@@ -6,7 +6,8 @@ import csv   #csvモジュールをインポートする
 import datetime
 import numpy as np
 
-def csvfl_csvToList (csvFullPath ):
+#---------------------------------------------------------
+def csvfl_csvToList (csvFullPath):
     
     f = open(csvFullPath, 'r')
     dataReader = csv.reader(f)
@@ -38,17 +39,17 @@ def csvfl_listToCsv (source, ovwFlag, directory, csvName):
     f.close()
     return 1, newName, countRows
 
-    
+#============================ 
 if __name__=='__main__':
     
     csvFullPath = r'C:\work\GitHub\pyCSV\data\sample_data.CSV'
     newData = []
     countRows = 0
-    countColumns = 0
+    countFields = 0
     print('>>> start : csvfl_csvToList')
-    result, newData, countRows, countColumns = csvfl_csvToList (csvFullPath)
+    result, newData, countRows, countFields = csvfl_csvToList (csvFullPath)
     print('The number of rows in original csv is ...' + str(countRows))
-    print('The number of columns in original csv is ...' + str(countColumns))
+    print('The number of fields in original csv is ...' + str(countFields))
     print('<<< finish : csvfl_csvToList')
     
     directory = r'C:\work\GitHub\pyCSV\data\_'

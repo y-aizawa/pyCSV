@@ -11,35 +11,35 @@ import math
 import copy
 
 #---------------------------------------------------------
-def csvrec_deleteRecords(source, recNumbers):   
+def csvrec_deleteRows(source, rowNumbers):   
     # 削除対象行のrecordNumbers降順に並べる
-    recNumbers.sort()
-    recNumbers.reverse()
+    rowNumbers.sort()
+    rowNumbers.reverse()
     # 各要素に1を引く。recordIndexesはrecord 1,2,3を削除したい場合[1,2,3]となっているため。
-    recIndexes = [x - 1 for x in recNumbers]
+    rowIndexes = [x - 1 for x in rowNumbers]
     # 行削除
-    for idx in recIndexes:
+    for idx in rowIndexes:
         del source[idx]
 
     return 1, source, np.array(source).shape[0], np.array(source).shape[1]
 
 #---------------------------------------------------------
-def csvrec_matchRecordIndexes(source, targetFieldNumber, key):
+def csvrec_matchRowNumbers(source, targetColumnNumber, key):
     # index
     indexes = []
     for i, x in enumerate(source):
-        if x[targetFieldNumber -1] == key:
+        if x[targetColumnNumber -1] == key:
             indexes.append(i)
-    recNumbers = [x + 1 for x in indexes]
+    rowNumbers = [x + 1 for x in indexes]
 
-    return 1, recNumbers
+    return 1, rowNumbers
 
 #---------------------------------------------------------
 def csvrec_sampling(source, samplingRatio):
     # headerを確保
     header = copy.deepcopy(source[0])
     # sourceからheadderを削除
-    result, sourceWOHeader, countRows, countFields = csvrec_deleteRecords(source, [1])
+    result, sourceWOHeader, countRows, countFields = csvrec_deleteRows(source, [1])
     # サンプリング数の計算
     numberOfSamples = math.ceil(countRows * samplingRatio)    
     # サンプリング対象Indexを取得
@@ -57,31 +57,31 @@ if __name__=='__main__':
     csvFullPath = r'C:\work\GitHub\pyCSV\data\sample_data.CSV'
     newData = []
     countRows = 0
-    countFields = 0
+    countColumns = 0
     print('>>> start : csvfl_csvToList')
     result, newData, countRows, countFields = csvfl_csvToList (csvFullPath)
     print('The number of rows in original csv is ...' + str(countRows))
-    print('The number of Fields in original csv is ...' + str(countFields))
+    print('The number of columns in original csv is ...' + str(countColumns))
     print('<<< finish : csvfl_csvToList')
     
 #    print('')
 #    print('>>> start : csvrec_deleteRecords')
 #    result, newData, countRows, countFields = csvrec_sampling(newData, 0.01)
 #    print('The number of rows in original csv is ...' + str(countRows))
-#    print('The number of Fields in original csv is ...' + str(countFields))
+#    print('The number of columns in original csv is ...' + str(countColumns))
 #    print('<<< finish : csvrec_deleteRecords')
 
     print('')
     print('>>> start : csvrec_matchRecordIndexes')
-    result, indexes = csvrec_matchRecordIndexes(newData, 2, '山口県')
-    print('The number of rows in original csv is ...' + str(indexes))
+    result, rowNumbers = csvrec_matchRowNumbers(newData, 2, '山口県')
+    print('The number of rows in original csv is ...' + str(rowNumbers))
     print('<<< finish : csvrec_matchRecordIndexes')
   
     print('')
     print('>>> start : csvrec_deleteRecords')
-    result, newData, countRows, countFields = csvrec_deleteRecords(newData, indexes)
+    result, newData, countRows, countFields = csvrec_deleteRows(newData, rowNumbers)
     print('The number of rows in original csv is ...' + str(countRows))
-    print('The number of Fields in original csv is ...' + str(countFields))
+    print('The number of columns in original csv is ...' + str(countColumns))
     print('<<< finish : csvrec_deleteRecords')
 
     directory = r'C:\work\GitHub\pyCSV\data\_'

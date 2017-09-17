@@ -9,16 +9,16 @@ import numpy as np
 
 
 #---------------------------------------------------------
-def csvfld_deleteFields(source, fieldNumbers):
+def csvfld_deleteCollumns(source, columnNumbers):
     # 削除対象列のcolNumbersを降順に並べる
-    fieldNumbers.sort()
-    fieldNumbers.reverse()
+    columnNumbers.sort()
+    columnNumbers.reverse()
     
     # 列削除
-    for fieldNum in fieldNumbers:
+    for colNum in columnNumbers:
         for row in source:
             #2列目を削除したい場合[2]が渡されるので、-1する。
-            row.pop(fieldNum-1)
+            row.pop(colNum-1)
 
     return 1, source, np.array(source).shape[0], np.array(source).shape[1]
 
@@ -28,19 +28,19 @@ if __name__=='__main__':
     csvFullPath = r'C:\work\GitHub\pyCSV\data\sample_data.CSV'
     newData = []
     countRows = 0
-    countFields = 0
+    countColumns = 0
     print('>>> start : csvfl_csvToList')
     result, newData, countRows, countFields = csvfl_csvToList (csvFullPath)
     print('The number of rows in original csv is ...' + str(countRows))
-    print('The number of columns in original csv is ...' + str(countFields))
+    print('The number of columns in original csv is ...' + str(countColumns))
     print('<<< finish : csvfl_csvToList')
     
     print('')
-    print('>>> start : csvfld_deleteFields')
-    result, newData, countRows, countFields = csvfld_deleteFields(newData, [3,5,6])
+    print('>>> start : csvfld_deleteCollumns')
+    result, newData, countRows, countColumns = csvfld_deleteCollumns(newData, [3,5,6])
     print('The number of rows in original csv is ...' + str(countRows))
-    print('The number of columns in original csv is ...' + str(countFields))
-    print('<<< finish : csvfld_deleteFields')
+    print('The number of columns in original csv is ...' + str(countColumns))
+    print('<<< finish : csvfld_deleteCollumns')
   
     directory = r'C:\work\GitHub\pyCSV\data\_'
     newName = ""

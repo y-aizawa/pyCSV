@@ -3,10 +3,7 @@
 Modules manipulate a LIST which was converted from a CSV file.
 The data will be manipulated in a LIST are equivalent to Field(Column) in CSV.
 """
-from sample_csv_file import csvfl_csvToList
-from sample_csv_file import csvfl_listToCsv
 import numpy as np
-
 
 #---------------------------------------------------------
 def csvfld_deleteCollumns(source, columnNumbers):
@@ -24,29 +21,4 @@ def csvfld_deleteCollumns(source, columnNumbers):
 
 #============================ 
 if __name__=='__main__':
-    
-    csvFullPath = r'C:\work\GitHub\pyCSV\data\sample_data.CSV'
-    newData = []
-    countRows = 0
-    countColumns = 0
-    print('>>> start : csvfl_csvToList')
-    result, newData, countRows, countFields = csvfl_csvToList (csvFullPath)
-    print('The number of rows in original csv is ...' + str(countRows))
-    print('The number of columns in original csv is ...' + str(countColumns))
-    print('<<< finish : csvfl_csvToList')
-    
-    print('')
-    print('>>> start : csvfld_deleteCollumns')
-    result, newData, countRows, countColumns = csvfld_deleteCollumns(newData, [3,5,6])
-    print('The number of rows in original csv is ...' + str(countRows))
-    print('The number of columns in original csv is ...' + str(countColumns))
-    print('<<< finish : csvfld_deleteCollumns')
-  
-    directory = r'C:\work\GitHub\pyCSV\data\_'
-    newName = ""
-    print('')
-    print('>>> start : csvfl_listToCsv')
-    result, newName, countRows = csvfl_listToCsv (newData, True, directory, "newCsv")
-    print('The new file name is ...' + newName)
-    print('The number of rows in the new csv is ...' + str(countRows))
-    print('>>> finish : csvfl_listToCsv')
+    pass

@@ -3,8 +3,6 @@
 Modules manipulate a LIST which was converted from a CSV file.
 The data will be manipulated in a LIST are equivalent to Record in CSV.
 """
-from sample_csv_file import csvfl_csvToList
-from sample_csv_file import csvfl_listToCsv
 import numpy as np
 import random
 import math
@@ -53,43 +51,7 @@ def csvrec_sampling(source, samplingRatio):
 
 #============================ 
 if __name__=='__main__':
-    
-    csvFullPath = r'C:\work\GitHub\pyCSV\data\sample_data.CSV'
-    newData = []
-    countRows = 0
-    countColumns = 0
-    print('>>> start : csvfl_csvToList')
-    result, newData, countRows, countFields = csvfl_csvToList (csvFullPath)
-    print('The number of rows in original csv is ...' + str(countRows))
-    print('The number of columns in original csv is ...' + str(countColumns))
-    print('<<< finish : csvfl_csvToList')
-    
-#    print('')
-#    print('>>> start : csvrec_deleteRecords')
-#    result, newData, countRows, countFields = csvrec_sampling(newData, 0.01)
-#    print('The number of rows in original csv is ...' + str(countRows))
-#    print('The number of columns in original csv is ...' + str(countColumns))
-#    print('<<< finish : csvrec_deleteRecords')
+    pass
 
-    print('')
-    print('>>> start : csvrec_matchRecordIndexes')
-    result, rowNumbers = csvrec_matchRowNumbers(newData, 2, '山口県')
-    print('The number of rows in original csv is ...' + str(rowNumbers))
-    print('<<< finish : csvrec_matchRecordIndexes')
-  
-    print('')
-    print('>>> start : csvrec_deleteRecords')
-    result, newData, countRows, countFields = csvrec_deleteRows(newData, rowNumbers)
-    print('The number of rows in original csv is ...' + str(countRows))
-    print('The number of columns in original csv is ...' + str(countColumns))
-    print('<<< finish : csvrec_deleteRecords')
 
-    directory = r'C:\work\GitHub\pyCSV\data\_'
-    newName = ""
-    print('')
-    print('>>> start : csvfl_listToCsv')
-    result, newName, countRows = csvfl_listToCsv (newData, True, directory, "newCsv")
-    print('The new file name is ...' + newName)
-    print('The number of rows in the new csv is ...' + str(countRows))
-    print('>>> finish : csvfl_listToCsv')
     

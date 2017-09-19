@@ -41,23 +41,4 @@ def csvfl_listToCsv (source, ovwFlag, directory, csvName):
 
 #============================ 
 if __name__=='__main__':
-    
-    csvFullPath = r'C:\work\GitHub\pyCSV\data\sample_data.CSV'
-    newData = []
-    countRows = 0
-    countFields = 0
-    print('>>> start : csvfl_csvToList')
-    result, newData, countRows, countFields = csvfl_csvToList (csvFullPath)
-    print('The number of rows in original csv is ...' + str(countRows))
-    print('The number of fields in original csv is ...' + str(countFields))
-    print('<<< finish : csvfl_csvToList')
-    
-    directory = r'C:\work\GitHub\pyCSV\data\_'
-    newName = ""
-    print('')
-    print('>>> start : csvfl_listToCsv')
-    result, newName, countRows = csvfl_listToCsv (newData, True, directory, "newCsv")
-    print('The new file name is ...' + newName)
-    print('The number of rows in the new csv is ...' + str(countRows))
-    print('>>> finish : csvfl_listToCsv')
-    
+    pass

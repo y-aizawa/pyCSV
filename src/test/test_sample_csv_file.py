@@ -19,7 +19,7 @@ class TestCsvFile(unittest.TestCase):
         pass
     
     def test_csvfl_csvToList(self):
-        csvFullPath = r'C:\work\GitHub\pyCSV\data\sample_data.CSV'
+        csvFullPath = r'C:\work\pyCSV\data\sample_data.CSV'
         countRows = 0
         countColumns = 0
         global newData
@@ -28,7 +28,7 @@ class TestCsvFile(unittest.TestCase):
 
     def test_csvfl_listToCsv(self):
         global newData
-        directory = r'C:\work\GitHub\pyCSV\data\_'
+        directory = r'C:\work\pyCSV\data\_'
         result, newName, countRows = csvfl_listToCsv (newData, True, directory, "newCsv")
         self.assertEqual((1, 124118), (result, countRows))
         print('### The following file is created. => ' + newName)

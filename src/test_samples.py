@@ -3,6 +3,7 @@
 Unit test suite by using "discover" method.
 """
 import unittest
+import datetime
 
 #--------------------------------------------
 # テストスイートを作成
@@ -21,8 +22,12 @@ def suite():
 
 #--------------------------------------------
 if __name__ == "__main__":
-    print("Start --- Unit Test Suite ---")
+    d = datetime.datetime.today()
+    print("start ::: " +  d.strftime("%x %X"))
+    
     # テストスイートを呼び出して実行します
     uts = suite()
     unittest.TextTestRunner().run(uts)
-    print("Finish --- Unit Test Suite ---")
+    
+    d = datetime.datetime.today()
+    print("finish ::: " +  d.strftime("%x %X"))

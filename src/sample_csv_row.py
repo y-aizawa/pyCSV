@@ -3,7 +3,6 @@
 Modules manipulate a LIST which was converted from a CSV file.
 The data will be manipulated in a LIST are equivalent to Record in CSV.
 """
-import numpy as np
 import random
 import math
 import copy
@@ -13,13 +12,26 @@ def csvrec_deleteRows(source, rowNumbers):
     # 削除対象行のrecordNumbers降順に並べる
     rowNumbers.sort()
     rowNumbers.reverse()
+    
     # 各要素に1を引く。recordIndexesはrecord 1,2,3を削除したい場合[1,2,3]となっているため。
     rowIndexes = [x - 1 for x in rowNumbers]
+
     # 行削除
     for idx in rowIndexes:
         del source[idx]
-
-    return 1, source, np.array(source).shape[0], np.array(source).shape[1]
+        
+    #　行数、列数計算
+    r = 0
+    c = 0
+    for row in source:
+        r += 1
+        if c < len(row):
+            c = len(row)
+            
+    # sourceが大きいとMemoryErrorが出てしまうため、処理を変更。
+    # return 1, source, np.array(source).shape[0], np.array(source).shape[1]
+    
+    return 1, source, r, c
 
 #---------------------------------------------------------
 def csvrec_matchRowNumbers(source, targetColumnNumber, key):
@@ -47,7 +59,7 @@ def csvrec_sampling(source, samplingRatio):
     # ヘッダを挿入
     samples.insert(0, header)
     
-    return 1, samples, numberOfSamples + 1, np.array(samples).shape[1]
+    return 1, samples, numberOfSamples + 1, len(header)
 
 #============================ 
 if __name__=='__main__':

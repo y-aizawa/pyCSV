@@ -17,7 +17,7 @@ newData = []
 class TestCsvRown(unittest.TestCase):
         
     def setUp(self):
-        csvFullPath = r'C:\work\GitHub\pyCSV\data\sample_data.CSV'
+        csvFullPath = r'C:\work\pyCSV\data\sample_data.CSV'
         countRows = 0
         countColumns = 0
         global newData

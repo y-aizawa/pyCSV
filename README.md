@@ -9,7 +9,7 @@ Wanna edit Big CSV data by Python in the same way on Excel.
 
 Handle the CSV data as 2x2 matrix and use the integer starts from 1 (not 0) when I specify the number of row and column. 
 
-Wanna say "Delete the 1st row" instead of saying "del list[0]".
+e.g.) Wanna say "Delete the 1st row" instead of saying "del list[0]".
 
 Requirements
 ------------------

@@ -11,6 +11,9 @@ from sample_csv_column import csvcol_deleteCollumns
 from sample_csv_column import csvcol_countEvery
 from sample_csv_column import csvcol_countEvery_TowColumns
 
+dataDir = r"C:\work\GitHub\pyCSV\data"
+csvFullPath = dataDir + r'\sample_data.CSV'
+
 class TestCsvColumn(unittest.TestCase):
     def setUp(self):
         pass
@@ -19,7 +22,6 @@ class TestCsvColumn(unittest.TestCase):
         pass
     
     def test_csvcol_deleteCollumns(self):
-        csvFullPath = r'C:\work\pyCSV\data\sample_data.CSV'
         countRows = 0
         countColumns = 0
         newData = []
@@ -29,24 +31,22 @@ class TestCsvColumn(unittest.TestCase):
         self.assertEqual((1, 124118, 4), (result, countRows, countColumns))
         
     def test_csvcol_countEvery(self):
-        csvFullPath = r'C:\work\pyCSV\data\sample_data.CSV'
         countRows = 0
         countColumns = 0
         newData = []
         result, newData, countRows, countColumns = csvfl_csvToList (csvFullPath)
         
         result, listCountEvery = csvcol_countEvery(newData, 2)
-        self.assertEqual((1, 47, '北海道', 8251), (result, len(listCountEvery), listCountEvery[0][0],listCountEvery[0][1]))
+        self.assertEqual((1, 47), (result, len(listCountEvery)))
         
     def test_csvcol_countEvery_TowColumns(self):
-        csvFullPath = r'C:\work\pyCSV\data\sample_data.CSV'
         countRows = 0
         countColumns = 0
         newData = []
         result, newData, countRows, countColumns = csvfl_csvToList (csvFullPath)
         
-        result, listCountEvery = csvcol_countEvery_TowColumns(newData, 2, 2)
-        self.assertEqual((1, 47, '北海道', '北海道', 8251), (result, len(listCountEvery), listCountEvery[0][0], listCountEvery[0][1], listCountEvery[0][2]))
+        result, listCountEvery = csvcol_countEvery_TowColumns(newData, 1, 2)
+        self.assertEqual((1, 119964), (result, len(listCountEvery)))
         
 if __name__=='__main__':
     unittest.main()

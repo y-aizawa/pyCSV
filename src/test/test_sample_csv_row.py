@@ -13,11 +13,12 @@ from sample_csv_row import csvrec_deleteRows
 from sample_csv_row import csvrec_sampling
 
 newData = []
+dataDir = r"C:\work\GitHub\pyCSV\data"
+csvFullPath = dataDir + '\sample_data.CSV'
 
 class TestCsvRown(unittest.TestCase):
         
     def setUp(self):
-        csvFullPath = r'C:\work\pyCSV\data\sample_data.CSV'
         countRows = 0
         countColumns = 0
         global newData

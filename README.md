@@ -13,8 +13,14 @@ e.g.) Wanna say "Delete the 1st row" instead of saying "del list[0]".
 
 Requirements
 ------------------
-  - Anaconda 4.2.0 (64-bit)
-  - Python 3.5.2
+
+- Anaconda 4.2.0 (64-bit)
+- Python 3.5.2
+
+Run the following if nessesary.
+```python
+pip install -r requirements.txt
+```
 
 Usage
 ------------------

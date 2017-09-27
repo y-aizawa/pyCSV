@@ -47,7 +47,9 @@ class TestCsvFile(unittest.TestCase):
     def testCsv_csvfl_csvToList_4(self):
         result, msg, newData, countRows, countColumns = csvfl_csvToList (csvFullPathEmpty)
         self.assertEqual((0, "Error : The file specified was empty.", 0, 0), (result, msg, countRows, countColumns)) 
+
         
+
     def testCsv_csvfl_listToCsv_1(self):
         global newData
         directory = dataDir + "\\"
@@ -55,14 +57,15 @@ class TestCsvFile(unittest.TestCase):
         print('listToCsv_1 : created file name is : => ' + newName)        
         self.assertEqual((1, "Complete."), (result, msg))
         
-  
+   
     def testCsv_csvfl_listToCsv_1_2(self):
         global newData
         directory = dataDir + "\\"
-        result, msg, newName = csvfl_listToCsv (newData, True, directory, "sample_data.CSV")
+        result, msg, newName = csvfl_listToCsv (newData, False, directory, "sample_data.CSV")
         print('listToCsv_1_2 : created file name is : => ' + newName)        
-        self.assertEqual((1, "Complete.",  "sample_data(1).CSV"), (result, msg, newName))
+        self.assertEqual((1, "Complete.",  "sample_data(1).csv"), (result, msg, newName))
         
+
     def testCsv_csvfl_listToCsv_2(self):
         directory = dataDir + "\\"
         result, msg, newName = csvfl_listToCsv ([], True, directory, newCsvName)
@@ -74,6 +77,7 @@ class TestCsvFile(unittest.TestCase):
         result, msg, newName = csvfl_listToCsv (newData, True, directory, csvFullPathErr)
         self.assertEqual((0, "Error : Invalid CSV file name. [C:\work\GitHub\pyCSV\data\err:::.CSV]", ""), (result, msg, newName))
         
+       
     def testCsv_csvfl_listToCsv_4(self):
         global newData
         directory = dataDirErr + "\\"

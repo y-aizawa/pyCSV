@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Unit test for sample_csv_file.py
+Unit test for csv_file.py
 """
 import sys
 sys.path.append('../') # 親ディレクトリの親ディレクトリを読み込む
@@ -57,7 +57,7 @@ class TestCsvFile(unittest.TestCase):
         print('listToCsv_1 : created file name is : => ' + newName)        
         self.assertEqual((1, "Complete."), (result, msg))
         
-   
+
     def testCsv_csvfl_listToCsv_1_2(self):
         global newData
         directory = dataDir + "\\"
@@ -71,13 +71,14 @@ class TestCsvFile(unittest.TestCase):
         result, msg, newName = csvfl_listToCsv ([], True, directory, newCsvName)
         self.assertEqual((0, "Error : The source was empty.", ""), (result, msg, newName))
 
+
     def testCsv_csvfl_listToCsv_3(self):
         global newData
         directory = dataDir + "\\"
         result, msg, newName = csvfl_listToCsv (newData, True, directory, csvFullPathErr)
         self.assertEqual((0, "Error : Invalid CSV file name. [C:\work\GitHub\pyCSV\data\err:::.CSV]", ""), (result, msg, newName))
         
-       
+ 
     def testCsv_csvfl_listToCsv_4(self):
         global newData
         directory = dataDirErr + "\\"

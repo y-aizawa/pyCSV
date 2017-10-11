@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-csvファイルをlistにconvertしたデータに対して、row（行）を編集するmoduleです。
+csvファイルをlistにconvertしたデータに対して、row（行）を編集するmoduleですよね。
 """
 
 import pandas

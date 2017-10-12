@@ -16,6 +16,7 @@ from csv_column import csvcol_deleteColumn
 from csv_column import csvcol_deleteColumns
 from csv_column import csvcol_duplicateColumn
 from csv_column import csvcol_countEvery
+from csv_column import csvcol_fillRandomNumber
 from pandas.util.testing import assert_frame_equal
 from csv_file import csvfl_csvToDataFrame
 from csv_file import csvfl_dataFrameToCsv
@@ -51,6 +52,12 @@ class TestCsvColumn(unittest.TestCase):
         
         result, msg, newName = csvfl_dataFrameToCsv (data_actual, 1, True, dataDir, "output_csvcol_combined_test_2.csv")
         self.assertEqual((1, "Complete.",  "output_csvcol_combined_test_2.csv"), (result, msg, newName))
+        
+        result, msg, data_actual, countRows, countColumns = csvcol_fillRandomNumber(source, [1,3,5], 8, True, True)
+        self.assertEqual((1, "Complete.", countRows, countColumns), (result, msg, countRows, countColumns))
+        
+        result, msg, newName = csvfl_dataFrameToCsv (data_actual, 1, True, dataDir, "output_csvcol_combined_test_3.csv")
+        self.assertEqual((1, "Complete.",  "output_csvcol_combined_test_3.csv"), (result, msg, newName))
         
 # PG_21
     # sourceのformatが不正
@@ -765,6 +772,143 @@ class TestCsvColumn(unittest.TestCase):
         self.assertEqual((1, "Complete.", 7, 10), (result, msg, countRows, countColumns))
         assert_frame_equal(data_actual, data_expected)
 
+#Test for svcol_fillRandomNumber
+    # sourceのformatが不正
+    def testCsv_svcol_fillRandomNumber1(self):
+        sourceNotList = []
+        columnNumbers = []
+        data_expected = pandas.DataFrame()
+
+        result, msg, data_actual, countRows, countColumns = csvcol_fillRandomNumber(sourceNotList, columnNumbers, 8, True, True)
+        self.assertEqual((0, "Error : The source was invalid format.", 0, 0), (result, msg, countRows, countColumns))
+        assert_frame_equal(data_actual, data_expected)
+
+    # sourceがNULL
+    def testCsv_svcol_fillRandomNumber2(self):
+        sourceNull = pandas.DataFrame()
+        columnNumbers = []
+        data_expected = pandas.DataFrame()
+
+        result, msg, data_actual, countRows, countColumns = csvcol_fillRandomNumber(sourceNull, columnNumbers, 8, True, True)
+        self.assertEqual((0, "Error : The source was empty.", 0, 0), (result, msg, countRows, countColumns))
+        assert_frame_equal(data_actual, data_expected)
+
+    # [keyColumnNumbers]が[list]のデータ型以外の場合
+    def testCsv_svcol_fillRandomNumber3(self):
+        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
+                                   ["2017-06-25","国","2","M","","12893","0","0","12893"],
+                                   ["2017-06-25","国","3","短","","12893","0","0","0"]])
+        columnNumbersNotList = "1"
+        data_expected = pandas.DataFrame()
+
+        result, msg, data_actual, countRows, countColumns = csvcol_fillRandomNumber(source, columnNumbersNotList, 8, True, True)
+        self.assertEqual((-1, "Error : An unexpected error occurred.", 0, 0), (result, msg, countRows, countColumns))
+        assert_frame_equal(data_actual, data_expected)
+
+    # keyColumnNumbersがNULL
+    def testCsv_svcol_fillRandomNumber4(self):
+        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
+                                   ["2017-06-25","国","2","M","","12893","0","0","12893"],
+                                   ["2017-06-25","国","3","短","","12893","0","0","0"]])
+        columnNumbersNull = []
+        data_expected = pandas.DataFrame()
+
+        result, msg, data_actual, countRows, countColumns = csvcol_fillRandomNumber(source, columnNumbersNull, 8, True, True)
+        self.assertEqual((-1, "Error : An unexpected error occurred.", 0, 0), (result, msg, countRows, countColumns))
+        assert_frame_equal(data_actual, data_expected)
+
+    # [keyColumnNumbersがNULL] 内の要素が[int]のデータ型以外の場合
+    def testCsv_svcol_fillRandomNumber5(self):
+        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
+                                   ["2017-06-25","国","2","M","","12893","0","0","12893"],
+                                   ["2017-06-25","国","3","短","","12893","0","0","0"]])
+        columnNumbersNNotNumber = [1,"5"]
+        data_expected = pandas.DataFrame()
+
+        result, msg, data_actual, countRows, countColumns = csvcol_fillRandomNumber(source, columnNumbersNNotNumber, 8, True, True)
+        self.assertEqual((-1, "Error : An unexpected error occurred.", 0, 0), (result, msg, countRows, countColumns))
+        assert_frame_equal(data_actual, data_expected)
+
+     # keyUniqueがsourceの範囲を超えていた
+    def testCsv_svcol_fillRandomNumber6(self):
+        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
+                                   ["2017-06-25","国","2","M","","12893","0","0","12893"],
+                                   ["2017-06-25","国","3","短","","12893","0","0","0"]])
+        columnNumbersOutRangeMin = [0, 5]
+        data_expected = pandas.DataFrame()
+
+        result, msg, data_actual, countRows, countColumns = csvcol_fillRandomNumber(source, columnNumbersOutRangeMin, 8, True, True)
+        self.assertEqual((0, "Error : The specified columnNumbers was out of range. [[0, 5]]", 0, 0), (result, msg, countRows, countColumns))
+        assert_frame_equal(data_actual, data_expected)
+
+     # keyUniqueがsourceの範囲を超えていた
+    def testCsv_svcol_fillRandomNumber7(self):
+        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
+                                   ["2017-06-25","国","2","M","","12893","0","0","12893"],
+                                   ["2017-06-25","国","3","短","","12893","0","0","0"]])
+        keyColumnNumbersOutRangeMax = [2,10]
+        data_expected = pandas.DataFrame()
+
+        result, msg, data_actual, countRows, countColumns = csvcol_fillRandomNumber(source, keyColumnNumbersOutRangeMax, 8, True, True)
+        self.assertEqual((0, "Error : The specified columnNumbers was out of range. [[2, 10]]", 0, 0), (result, msg, countRows, countColumns))
+        assert_frame_equal(data_actual, data_expected)
+
+    # 処理が問題なく完了した（1 column）
+    def testCsv_svcol_fillRandomNumber8(self):
+        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
+                                   ["2017-06-25","国","2","M","","12893","0","0","12893"],
+                                   ["2017-06-25","国","3","短","","12893","0","0","0"],
+                                   ["2017-06-25","国","4","記述	","","12893","0","0","0"],
+                                   ["2017-06-26","国","2","M","","12323","0","0","1000"],
+                                   ["2017-06-26","国","3","短","","12323","0","0","1000"],
+                                   ["2017-06-26","数","8","記述	","","12323","0","0","1000"]])
+        columnNumbers = [1]
+        result, msg, data_actual, countRows, countColumns = csvcol_fillRandomNumber(source, columnNumbers, 8, True, True)
+        self.assertEqual((1, "Complete.", 7, 9), (result, msg, countRows, countColumns))
+
+
+    # 処理が問題なく完了した(duplicate column)
+    def testCsv_svcol_fillRandomNumber9(self):
+        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
+                                   ["2017-06-25","国","2","M","","12893","0","0","12893"],
+                                   ["2017-06-25","国","3","短","","12893","0","0","0"],
+                                   ["2017-06-25","国","4","記述	","","12893","0","0","0"],
+                                   ["2017-06-26","国","2","M","","12323","0","0","1000"],
+                                   ["2017-06-26","国","3","短","","12323","0","0","1000"],
+                                   ["2017-06-26","数","8","記述	","","12323","0","0","1000"]])
+        columnNumbers = [1,1,1]
+        result, msg, data_actual, countRows, countColumns = csvcol_fillRandomNumber(source, columnNumbers, 8, True, True)
+        self.assertEqual((1, "Complete.", 7, 9), (result, msg, countRows, countColumns))
+
+
+    # 処理が問題なく完了した（many column）
+    def testCsv_svcol_fillRandomNumber10(self):
+        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
+                                   ["2017-06-25","国","2","M","","12893","0","0","12893"],
+                                   ["2017-06-25","国","3","短","","12893","0","0","0"],
+                                   ["2017-06-25","国","4","記述	","","12893","0","0","0"],
+                                   ["2017-06-26","国","2","M","","12323","0","0","1000"],
+                                   ["2017-06-26","国","3","短","","12323","0","0","1000"],
+                                   ["2017-06-26","数","8","記述	","","12323","0","0","1000"]])
+        columnNumbers = [1,2]
+        result, msg, data_actual, countRows, countColumns = csvcol_fillRandomNumber(source, columnNumbers, 8, True, True)
+        self.assertEqual((1, "Complete.", 7, 9), (result, msg, countRows, countColumns))
+
+        
+    # 処理が問題なく完了した（all column）
+    def testCsv_svcol_fillRandomNumber11(self):
+        source = pandas.DataFrame([
+            ["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
+            ["2017-06-25","国","2","M","","12893","0","0","12893"],
+            ["2017-06-25","国","3","短","","12893","0","0","0"],
+            ["2017-06-25","国","4","記述	","","12893","0","0","0"],
+            ["2017-06-26","国","2","M","","12323","0","0","1000"],
+            ["2017-06-26","国","3","短","","12323","0","0","1000"],
+            ["2017-06-26","数","8","記述	","","12323","0","0","1000"]])
+        columnNumbers = [1,2,3,4,5,6,7,8,9]
+        result, msg, data_actual, countRows, countColumns = csvcol_fillRandomNumber(source, columnNumbers, 8, True, True)
+        self.assertEqual((1, "Complete.", 7, 9), (result, msg, countRows, countColumns))
+        
     # Case: input correct values
     # source's large size (110万行 x 700列)
     def testPerformance(self):

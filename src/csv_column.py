@@ -6,6 +6,7 @@ csvファイルをDataFrameにconvertしたデータに対して、column（列�
 import pandas
 import constants as const
 import numpy as np
+import random
 
 """
 機能      :   headerNameとheader名が一致する列番号を取得する
@@ -386,5 +387,92 @@ def csvcol_countEvery(source,keyColumnNumbers):
     finally:
         return result, msg, newData, countRows, countColumns
 
+"""
+機能   :    columnNumbers (list)で指定した複数列の値を乱数で埋める。
+引数   :
+            DataFrame   :   DataFrame形式のデータ
+            list        :   乱数で埋める列番号のlist
+            int         :   乱数の桁数
+            int         :   頭を０パディングするかどうかのフラグ True=する。False=しない。
+            int         :   ヘッダがあるかどうかのフラグ。True=有る。False=無い。無い場合、全ての行が乱数に置き換わる。
+戻り値  :
+            int         :   ステータス
+            string      :   メッセージ
+            DataFrame   :   指定列を乱数で埋めたDataFrame
+            int         :   csvファイルにした場合のデータの行数
+            int         :   csvファイルにした場合のデータの列数  
+"""
+def csvcol_fillRandomNumber(source, columnNumbers, digit, padingFlg, headerFlg):
+    result = const.RESULT_COMPLETE      # ステータス
+    msg = const.MSG_COMPLETE            # メッセージ
+    newData = pandas.DataFrame()        # count結果をDataFrame形式にしたデータ
+    countRows = 0                       # csvファイルにした場合のデータの行数
+    countColumns = 0                    # csvファイルにした場合のデータの列数
+
+    try:
+        # sourceのformatが不正
+        if type(source) is not pandas.core.frame.DataFrame:
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_INVALID_FORMAT_SOURCE
+            return
+
+        # sourceがNULL
+        if not source.shape[0]:
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_EMPTY_SOURCE
+            return
+
+        # [columnNumbers]が[list]のデータ型以外の場合
+        # columnNumbersがNULL
+        if (type(columnNumbers) is not list) or (not len(columnNumbers)):
+            raise Exception
+
+        keyUnique = np.unique(columnNumbers).tolist()
+        # [keyUnique] 内の要素が[int]のデータ型以外の場合
+        if not all(type(item) is int for item in keyUnique):
+            raise Exception
+
+        # keyUniqueがsourceの範囲を超えていた
+        if (source.shape[1] < max(keyUnique) or min(keyUnique) < 1):
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_OUT_OF_RANGE.format(const.NAME_COLUMN_NUMBERS, columnNumbers)
+            return
+            
+        # 列番号をindexに変換するため-1。
+        columnNumbers[:] = [x - 1 for x in columnNumbers]
+
+        # 置き換えるレコードの行数を計算
+        if headerFlg == True:
+            countRecords = source.shape[0]-1
+        else:
+            countRecords = source.shape[0]
+
+        # 指定された列数分処理を行う
+        for col in columnNumbers:
+            # 8桁の乱数を生成 (ヘッダを引いた行数分)
+            randomIDs = random.sample(range(10**digit-1), k=countRecords)
+
+            # 0でパディングし8ケタにする。
+            if padingFlg == True: randomIDs = [str(i).zfill(8) for i in randomIDs]
+
+            # 乱数で置き換える
+            if headerFlg == True:
+                source.iloc[1:,col] = randomIDs
+            else:
+                source.iloc[:,col] = randomIDs
+
+        newData = source
+        countRows = source.shape[0]
+        countColumns = source.shape[1]
+
+    # 予期しなかったError
+    except Exception:
+        result = const.RESULT_ERR_UNEXPECTED
+        msg = const.MSG_ERR_UNEXPECTED
+
+    finally:
+        return result, msg, newData, countRows, countColumns        
+        
+        
 if __name__=='__main__':
     print("")

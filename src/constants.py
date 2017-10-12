@@ -40,4 +40,6 @@ MSG_ERR_OUT_OF_RANGE_LIST = 'Error : The specified {} in the {} was out of range
 MSG_ERR_OUT_OF_RANGE_SAMPLING = 'Error : The samplingRatio must be in range 0 to 1. [{}]'
 MSG_ERR_KEY_NOT_FOUND = 'Error : The specified key was not found in the column. [key = {}, targetColumnNumber = {}]'
 MSG_ERR_HEADER_NAME_DUPLICATED = 'Error : The specified headerName_To is duplicated. [{}]'
-MSG_ERR_DELETE_HEADER_ROW = 'Error :Cannot delete the header row.'
+MSG_ERR_DELETE_HEADER_ROW = 'Error : Cannot delete the header row.'
+
+MSG_ERR_ADDNOISE_OVERDIGITS = 'Error : The number of digits of the value must be less than 11. [{}]'

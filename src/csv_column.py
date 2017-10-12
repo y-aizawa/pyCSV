@@ -1,257 +1,390 @@
 # -*- coding: utf-8 -*-
 """
-csvファイルをlistにconvertしたデータに対して、column（列）を編集するmodule。
+csvファイルをDataFrameにconvertしたデータに対して、column（列）を編集するmodule
 """
 
 import pandas
 import constants as const
+import numpy as np
 
 """
-機能   :  headerNameとheader名が一致する列番号を取得する。
-引数   :  csv_file.pyのcsvfl_csvToList()で作成したlistデータと同形式のデータ
-          header名称
-戻り値  :  ステータス
-          メッセージ
-          headerのcolumnNumber 
+機能      :   headerNameとheader名が一致する列番号を取得する
+引数      :
+              DataFrame     :   DataFrame形式のデータ
+              string        :   header名称
+戻り値     :
+              int           :   ステータス
+              string        :   メッセージ
+              int           :   headerのcolumnNumber
 """
-def csvcol_getHeaderIndex(source, headerName):
-    result = const.RESULT_COMPLETE
-    msg = const.MSG_COMPLETE
-    headerColumnNumber = 0
+def csvcol_getHeaderColumnNumber(source, headerName):
+    result = const.RESULT_COMPLETE  # ステータス
+    msg = const.MSG_COMPLETE        # メッセージ
+    headerColumnNumber = 0          # headerのcolumnNumber
 
     try:
-        # sourceのformatが不正。
-        if(type(source) != list):
+        # sourceのformatが不正
+        if type(source) is not pandas.core.frame.DataFrame:
             result = const.RESULT_ERR
             msg = const.MSG_ERR_INVALID_FORMAT_SOURCE
             return
-        
-        # sourceがNULL。
-        if not len(source):
+
+        # [headerName]が[string]のデータ型以外の場合
+        if type(headerName) is not str:
+           raise Exception
+
+        # sourceがNULL
+        if not source.shape[0]:
             result = const.RESULT_ERR
             msg = const.MSG_ERR_EMPTY_SOURCE
             return
 
         i = 0
-        while (i < (len(source[0]))):
-            if(headerName == source[0][i]):
-                # 処理が問題なく完了した。
+        while (i < source.shape[1]):
+            if(headerName == source.iloc[0, i]):
                 headerColumnNumber = i + 1
                 break
             i = i + 1
+
+        # headerが見つからない
         if (headerColumnNumber == 0):
-            # headerが見つからない。
             result = const.RESULT_ERR
             msg = const.MSG_ERR_NOT_FOUND_HEADER_NAME.format(headerName)
+
+    # 予期しなかったError
     except Exception:
-        # 予期しなかったError。
         result = const.RESULT_ERR_UNEXPECTED
         msg = const.MSG_ERR_UNEXPECTED
+
     finally:
         return result, msg, headerColumnNumber
 
 """
-機能   :  headerColumnNumberと一致するheader名を取得する。
-引数   :  csv_file.pyのcsvfl_csvToList()で作成したlistデータと同形式のデータ
-          headerのcolumnNumber
-戻り値  :  ステータス
-          メッセージ
-          header名称
+機能   :    headerColumnNumberと一致するheader名を取得する
+引数   :
+            DataFrame   :   DataFrame形式のデータ
+            int         :   headerのcolumnNumber
+戻り値  :
+            int         :   ステータス
+            string      :   メッセージ
+            string      :   header名称
 """
 def csvcol_getHeaderName(source, headerColumnNumber):
-    result = const.RESULT_COMPLETE
-    msg = const.MSG_COMPLETE
-    headerName = ""
-    
+    result = const.RESULT_COMPLETE      # ステータス
+    msg = const.MSG_COMPLETE            # メッセージ
+    headerName = ""                     # header名称
+
     try:
-        # sourceのformatが不正。
-        if(type(source) != list):
+        # sourceのformatが不正
+        if type(source) is not pandas.core.frame.DataFrame:
             result = const.RESULT_ERR
             msg = const.MSG_ERR_INVALID_FORMAT_SOURCE
             return
-        
-        # sourceがNULL。
-        if not len(source):
+
+        # [headerColumnNumber]が[int]のデータ型以外の場合
+        if type(headerColumnNumber) is not int:
+           raise Exception
+
+        # sourceがNULL
+        if not source.shape[0]:
             result = const.RESULT_ERR
             msg = const.MSG_ERR_EMPTY_SOURCE
             return
 
-        if(headerColumnNumber <= (len(source[0])) and headerColumnNumber > 0):
-            # 処理が問題なく完了した。
-            headerName = source[0][headerColumnNumber-1]
-        else:
-            # headerColumnNumberがListの範囲を超えていた。
+        # headerColumnNumberがsourceの範囲を超えていた
+        if(headerColumnNumber > source.shape[1] or headerColumnNumber < 1):
             result = const.RESULT_ERR
             msg = const.MSG_ERR_OUT_OF_RANGE.format(const.NAME_HEADER_COLUMN_NUMBER, headerColumnNumber)
+            return
+
+        # 処理が問題なく完了した
+        headerName = source.iloc[0, headerColumnNumber-1]
+
+    # 予期しなかったError
     except Exception:
-        # 予期しなかったError。
         result = const.RESULT_ERR_UNEXPECTED
         msg = const.MSG_ERR_UNEXPECTED
+
     finally:
         return result, msg, headerName
 
 """
-機能   :  指定した列を削除する。
-引数   :  csv_file.pyのcsvfl_csvToList()で作成したlistデータと同形式のデータ
-          削除する列番号
-戻り値  :  ステータス
-          メッセージ
-          列削除後のデータをlistにしたもの
-          csvファイルにした場合のデータの行数
-          csvファイルにした場合のデータの列数       
+機能   :  指定した列を削除する
+引数   :
+            DataFrame   :   DataFrame形式のデータ
+            int         :   削除する列番号
+戻り値  :
+            int         :   ステータス
+            string      :   メッセージ
+            DataFrame   :   列削除後のDataFrame形式のデータ
+            int         :   csvファイルにした場合のデータの行数
+            int         :   csvファイルにした場合のデータの列数
 """
 def csvcol_deleteColumn(source, columnNumber):
-    result = const.RESULT_COMPLETE
-    msg = const.MSG_COMPLETE
-    newData = []
-    countRows = 0
-    countColumns = 0
-    
+    result = const.RESULT_COMPLETE      # ステータス
+    msg = const.MSG_COMPLETE            # メッセージ
+    newData = pandas.DataFrame()        # 列削除後のDataFrame形式のデータ
+    countRows = 0                       # csvファイルにした場合のデータの行数
+    countColumns = 0                    # csvファイルにした場合のデータの列数
+
     try:
-        # sourceのformatが不正。
-        if(type(source) != list):
+        # sourceのformatが不正
+        if type(source) is not pandas.core.frame.DataFrame:
             result = const.RESULT_ERR
             msg = const.MSG_ERR_INVALID_FORMAT_SOURCE
             return
-        
-        # sourceがNULL。
-        if not len(source):
+
+        # [columnNumber]が[int]のデータ型以外の場合
+        if type(columnNumber) is not int:
+           raise Exception
+
+        # sourceがNULL
+        if not source.shape[0]:
             result = const.RESULT_ERR
             msg = const.MSG_ERR_EMPTY_SOURCE
             return
-           
-        df = pandas.DataFrame(source)
-        if (columnNumber <= len(source[0]) and columnNumber > 0):
-            #2列目を削除したい場合[2]が渡されるので、-1する。
-            df.drop(df.columns[columnNumber-1], axis=1, inplace=True)
-            newData = df.values.tolist()
-            countRows = df.shape[0]
-            countColumns = df.shape[1]
-        else:
-            # columnNumberがListの範囲を超えていた。
+
+        # columnNumberがsourceの範囲を超えていた
+        if (columnNumber > source.shape[1] or columnNumber < 1):
             result = const.RESULT_ERR
             msg = const.MSG_ERR_OUT_OF_RANGE.format(const.NAME_COLUMN_NUMBER, columnNumber)
-    except Exception:
-        # 予期しなかったError。
-        result = const.RESULT_ERR_UNEXPECTED
-        msg = const.MSG_ERR_UNEXPECTED
-    finally:       
-        return result, msg, newData, countRows, countColumns
-
-"""
-機能   :  columnNumbers (list)で指定した複数の列を削除する。
-引数   :  csv_file.pyのcsvfl_csvToList()で作成したlistデータと同形式のデータ
-          削除する列番号のlist
-戻り値  :  ステータス
-          メッセージ
-          列削除後のcsvデータのlist
-          csvファイルにしたときのデータの行数
-          csvファイルにしたときのデータの列数
-"""
-def csvcol_deleteColumns(source, columnNumbers):
-    result = const.RESULT_COMPLETE
-    msg = const.MSG_COMPLETE
-    newData = []
-    countRows = 0
-    countColumns = 0
-
-    try:
-        # sourceのformatが不正。
-        if(type(source) != list):
-            result = const.RESULT_ERR
-            msg = const.MSG_ERR_INVALID_FORMAT_SOURCE
-            return
-        
-        # sourceがNULL。
-        if not len(source):
-            result = const.RESULT_ERR
-            msg = const.MSG_ERR_EMPTY_SOURCE
             return
 
-        for i in range(len(columnNumbers)):
-            if (columnNumbers[i] > len(source[0]) or columnNumbers[i] < 1):
-                # columnNumberがListの範囲を超えていた。
-                result = const.RESULT_ERR
-                msg = const.MSG_ERR_OUT_OF_RANGE_LIST.format(const.NAME_COLUMN_NUMBER, const.NAME_COLUMN_NUMBERS, columnNumbers)
-                return
-
-        df = pandas.DataFrame(source)
-        # 2列目を削除したい場合[2]が渡されるので、-1する。
-        columnNumbers[:] = [x - 1 for x in columnNumbers]
-        df.drop(df.columns[columnNumbers], axis=1, inplace=True)
-        countColumns = df.shape[1]
+        #2列目を削除したい場合[2]が渡されるので、-1する
+        source.drop(source.columns[columnNumber-1], axis=1, inplace=True)
+        source.set_axis(1, range(source.shape[1]))
+        countColumns = source.shape[1]
         if(countColumns == 0):
             countRows = 0
-            newData = []
+            newData = pandas.DataFrame()
         else:
-            countRows = df.shape[0]
-            newData = df.values.tolist()
+            countRows = source.shape[0]
+            newData = source
+
+    # 予期しなかったError
     except Exception:
-        # 予期しなかったError。
         result = const.RESULT_ERR_UNEXPECTED
         msg = const.MSG_ERR_UNEXPECTED
+
     finally:
         return result, msg, newData, countRows, countColumns
 
 """
-機能   :  指定した列(colulmnNumber_From)を、指定した列(colulmnNumber_To)に挿入する。処理後の列数は、処理前に比べて1増加する。
-引数   :  csv_file.pyのcsvfl_csvToList()で作成したlistデータと同形式のデータ
-          複写元の列番号
-          複写先の列番号
-戻り値  :  ステータス
-          メッセージ
-          複写後のlist
-          csvファイルにしたときのデータの行数
-          csvファイルにしたときのデータの列数
+機能   :  columnNumbers (list)で指定した複数の列を削除する
+引数   :
+            DataFrame   :   DataFrame形式のデータ
+            list        :   削除する列番号のlist
+戻り値  :
+            int         :   ステータス
+            string      :   メッセージ
+            DataFrame   :   列削除後のDataFrame形式のデータ
+            int         :   csvファイルにしたときのデータの行数
+            int         :   csvファイルにしたときのデータの列数
 """
-def csvcol_duplicateColumn(source, columnNumber_From, columnNumber_To = None):
-    result = const.RESULT_COMPLETE
-    msg = const.MSG_COMPLETE
-    newData = []
-    countRows = 0
-    countColumns = 0
+def csvcol_deleteColumns(source, columnNumbers):
+    result = const.RESULT_COMPLETE      # ステータス
+    msg = const.MSG_COMPLETE            # メッセージ
+    newData = pandas.DataFrame()        # 列削除後のDataFrame形式のデータ
+    countRows = 0                       # csvファイルにしたときのデータの行数
+    countColumns = 0                    # csvファイルにしたときのデータの列数
 
     try:
-        # sourceのformatが不正。
-        if(type(source) != list):
+        # sourceのformatが不正
+        if type(source) is not pandas.core.frame.DataFrame:
             result = const.RESULT_ERR
             msg = const.MSG_ERR_INVALID_FORMAT_SOURCE
             return
-        
-        # sourceがNULL。
-        if not len(source):
+
+        # [columnNumbers]が[list]のデータ型以外の場合
+        # columnNumbersがNULL
+        if (type(columnNumbers) is not list) or (not len(columnNumbers)):
+            raise Exception
+
+        # [columnNumbers] 内の要素が[int]のデータ型以外の場合
+        if not all(type(item) is int for item in columnNumbers):
+            raise Exception
+
+        # sourceがNULL
+        if not source.shape[0]:
             result = const.RESULT_ERR
             msg = const.MSG_ERR_EMPTY_SOURCE
             return
 
-        if (columnNumber_From < 1 or columnNumber_From > len(source[0])):
-            # columnNumber_FromがListの範囲を超えていた。
+        # columnNumberがsourceの範囲を超えていた
+        if (max(columnNumbers) > source.shape[1] or min(columnNumbers) < 1):
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_OUT_OF_RANGE_LIST.format(const.NAME_COLUMN_NUMBER, const.NAME_COLUMN_NUMBERS, columnNumbers)
+            return
+
+        # 2列目を削除したい場合[2]が渡されるので、-1する
+        columnNumbers[:] = [x - 1 for x in columnNumbers]
+        source.drop(source.columns[columnNumbers], axis=1, inplace=True)
+        source.set_axis(1, range(source.shape[1]))
+        countColumns = source.shape[1]
+        if(countColumns == 0):
+            countRows = 0
+            newData = pandas.DataFrame()
+        else:
+            countRows = source.shape[0]
+            newData = source
+
+    # 予期しなかったError
+    except Exception:
+        result = const.RESULT_ERR_UNEXPECTED
+        msg = const.MSG_ERR_UNEXPECTED
+
+    finally:
+        return result, msg, newData, countRows, countColumns
+
+"""
+機能   :  指定した列(colulmnNumber_From)を、指定した列(colulmnNumber_To)に挿入する
+          処理後の列数は、処理前に比べて1増加する
+引数   :
+            DataFrame   :   DataFrame形式のデータ
+            int         :   複写元の列番号
+            int         :   複写先の列番号（「0」の場合、最終列に追加）
+            string      :   複写先のヘッダ名
+戻り値  :
+            int         :   ステータス
+            string      :   メッセージ
+            DataFrame   :   複写後のDataFrame形式のデータ
+            int         :   csvファイルにしたときのデータの行数
+            int         :   csvファイルにしたときのデータの列数
+"""
+def csvcol_duplicateColumn(source, columnNumber_From, columnNumber_To, headerName_To):
+    result = const.RESULT_COMPLETE  # ステータス
+    msg = const.MSG_COMPLETE        # メッセージ
+    newData = pandas.DataFrame()    # 複写後のDataFrame形式のデータ
+    countRows = 0                   # csvファイルにしたときのデータの行数
+    countColumns = 0                # csvファイルにしたときのデータの列数
+
+    try:
+        # sourceのformatが不正
+        if type(source) is not pandas.core.frame.DataFrame:
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_INVALID_FORMAT_SOURCE
+            return
+
+        # [columnNumber_From]が[int]のデータ型以外の場合
+        if type(columnNumber_From) is not int:
+           raise Exception
+
+        # [columnNumber_To]が[int]のデータ型以外の場合
+        if type(columnNumber_To) is not int:
+           raise Exception
+
+        # [headerName_To]が[string]のデータ型以外の場合
+        if type(headerName_To) is not str:
+           raise Exception
+
+        # sourceがNULL
+        if not source.shape[0]:
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_EMPTY_SOURCE
+            return
+
+        # columnNumber_FromがListの範囲を超えていた
+        if (columnNumber_From < 1 or columnNumber_From > source.shape[1]):
             result = const.RESULT_ERR
             msg = const.MSG_ERR_OUT_OF_RANGE.format(const.NAME_COLUMN_NUMBER_FROM, columnNumber_From)
             return
 
-        if (columnNumber_To is None):
-            # colulmnNumber_To = nullの場合、最終列に追加する。
-            columnNumber_To = len(source[0]) + 1
+        # colulmnNumber_To = 「0」の場合、最終列に追加する
+        if columnNumber_To == 0:
+            columnNumber_To = source.shape[1] + 1
         else:
-            if (columnNumber_To < 1 or columnNumber_To > len(source[0])):
-                # columnNumber_ToがListの範囲を超えていた。
+            # columnNumber_Toがsourceの範囲を超えていた
+            if (columnNumber_To < 1 or columnNumber_To > source.shape[1]):
                 result = const.RESULT_ERR
                 msg = const.MSG_ERR_OUT_OF_RANGE.format(const.NAME_COLUMN_NUMBER_TO, columnNumber_To)
                 return
 
-        df = pandas.DataFrame(source)
-        df.insert(columnNumber_To - 1, len(source[0]), df[[columnNumber_From - 1]])
-        newData = df.values.tolist()
-        countRows = df.shape[0]
-        countColumns = df.shape[1]
+        result1, msg1, headerColumnNumber = csvcol_getHeaderColumnNumber(source, headerName_To)
+        # headerName_Toで指定されたヘッダ名が既に存在していた場合
+        if headerColumnNumber != 0:
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_HEADER_NAME_DUPLICATED.format(headerName_To)
+            return
+
+        source.insert(columnNumber_To - 1, source.shape[1], source.iloc[:, columnNumber_From - 1])
+        source.iloc[0, columnNumber_To - 1] = headerName_To
+        source.set_axis(1, range(source.shape[1]))
+        newData = source
+        countRows = source.shape[0]
+        countColumns = source.shape[1]
+
+    # 予期しなかったError
     except Exception:
-        # 予期しなかったError。
         result = const.RESULT_ERR_UNEXPECTED
         msg = const.MSG_ERR_UNEXPECTED
+
     finally:
         return result, msg, newData, countRows, countColumns
 
+"""
+機能   :    keyColumnNumbers (list)で指定した複数列の値を連結してuniqueなkeyとし、
+            source(DataFrame)内に出現する数をcountする。そして結果をDataFrameの形式で出力する
+引数   :
+            DataFrame   :   DataFrame形式のデータ
+            list        :   keyにする列番号のlist
+戻り値  :
+            int         :   ステータス
+            string      :   メッセージ
+            DataFrame   :   count結果をDataFrame形式にしたデータ
+            int         :   csvファイルにした場合のデータの行数
+            int         :   csvファイルにした場合のデータの列数  
+"""
+def csvcol_countEvery(source,keyColumnNumbers):
+    HEADER_NAME_COUNT = 'count'
+    result = const.RESULT_COMPLETE      # ステータス
+    msg = const.MSG_COMPLETE            # メッセージ
+    newData = pandas.DataFrame()        # count結果をDataFrame形式にしたデータ
+    countRows = 0                       # csvファイルにした場合のデータの行数
+    countColumns = 0                    # csvファイルにした場合のデータの列数
+
+    try:
+        # sourceのformatが不正
+        if type(source) is not pandas.core.frame.DataFrame:
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_INVALID_FORMAT_SOURCE
+            return
+
+        # sourceがNULL
+        if not source.shape[0]:
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_EMPTY_SOURCE
+            return
+
+        # [keyColumnNumbers]が[list]のデータ型以外の場合
+        # keyColumnNumbersがNULL
+        if (type(keyColumnNumbers) is not list) or (not len(keyColumnNumbers)):
+            raise Exception
+
+        keyUnique = np.unique(keyColumnNumbers).tolist()
+        # [keyUnique] 内の要素が[int]のデータ型以外の場合
+        if not all(type(item) is int for item in keyUnique):
+            raise Exception
+
+        # keyUniqueがsourceの範囲を超えていた
+        if (source.shape[1] < max(keyUnique) or min(keyUnique) < 1):
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_OUT_OF_RANGE.format(const.NAME_KEY_COLUMN_NUMBERS, keyColumnNumbers)
+            return
+
+        source.set_axis(1, range(1, source.shape[1] + 1))
+        newData = pandas.DataFrame(source.groupby(keyUnique, sort=False).size()).reset_index().astype(str)
+        newData.set_axis(1, range(newData.shape[1]))
+        countRows = newData.shape[0]
+        countColumns = newData.shape[1]
+        newData.iloc[0, countColumns-1] = HEADER_NAME_COUNT
+
+    # 予期しなかったError
+    except Exception:
+        result = const.RESULT_ERR_UNEXPECTED
+        msg = const.MSG_ERR_UNEXPECTED
+
+    finally:
+        return result, msg, newData, countRows, countColumns
 
 if __name__=='__main__':
     print("")

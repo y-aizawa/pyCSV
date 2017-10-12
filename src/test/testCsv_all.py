@@ -11,8 +11,8 @@ def suite():
     # TestSuiteから空っぽのテストスイートを作成します
     test_suite = unittest.TestSuite()
     
-    # discoverメソッドを用いて、testディレクトリ以下からテストクラスを見つける
-    all_test_suite = unittest.defaultTestLoader.discover("test", pattern="test_*.py")
+    # discoverメソッドを用いて、testディレクトリ以下からテストクラスを見つける場合には"."⇒"test"にする。
+    all_test_suite = unittest.defaultTestLoader.discover(".", pattern="testCsv_*.py")
     
     # 見つけたテストクラスをテストスイートに追加します
     for ts in all_test_suite:

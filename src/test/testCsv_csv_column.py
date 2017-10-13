@@ -17,6 +17,7 @@ from csv_column import csvcol_deleteColumns
 from csv_column import csvcol_duplicateColumn
 from csv_column import csvcol_countEvery
 from csv_column import csvcol_fillRandomNumber
+from csv_column import csvcol_fillSequentialNumber
 from pandas.util.testing import assert_frame_equal
 from csv_file import csvfl_csvToDataFrame
 from csv_file import csvfl_dataFrameToCsv
@@ -58,6 +59,13 @@ class TestCsvColumn(unittest.TestCase):
         
         result, msg, newName = csvfl_dataFrameToCsv (data_actual, 1, True, dataDir, "output_csvcol_combined_test_3.csv")
         self.assertEqual((1, "Complete.",  "output_csvcol_combined_test_3.csv"), (result, msg, newName))
+        
+        result, msg, data_actual, countRows, countColumns = csvcol_fillSequentialNumber(source, [1,3,5], 8, True, True)
+        self.assertEqual((1, "Complete.", countRows, countColumns), (result, msg, countRows, countColumns))
+        
+        result, msg, newName = csvfl_dataFrameToCsv (data_actual, 1, True, dataDir, "output_csvcol_combined_test_4.csv")
+        self.assertEqual((1, "Complete.",  "output_csvcol_combined_test_4.csv"), (result, msg, newName))
+
         
 # PG_21
     # sourceのformatが不正

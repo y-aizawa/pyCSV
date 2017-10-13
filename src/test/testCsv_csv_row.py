@@ -105,7 +105,7 @@ class TestCsvFile(unittest.TestCase):
         data_expected = pandas.DataFrame()
 
         result, msg, data_actual, countRows, countColumns = csvrow_deleteRow(source, 1)
-        self.assertEqual((0, "Error :Cannot delete the header row.", 0, 0),(result, msg, countRows, countColumns))
+        self.assertEqual((0, "Error : Cannot delete the header row.", 0, 0),(result, msg, countRows, countColumns))
         assert_frame_equal(data_expected, data_actual)
 
     # Case: input correct values
@@ -232,7 +232,7 @@ class TestCsvFile(unittest.TestCase):
         data_expected = pandas.DataFrame()
 
         result, msg, data_actual, countRows, countColumns = csvrow_deleteRows(source, [1,2])
-        self.assertEqual((0, "Error :Cannot delete the header row.", 0, 0),(result, msg, countRows, countColumns))
+        self.assertEqual((0, "Error : Cannot delete the header row.", 0, 0),(result, msg, countRows, countColumns))
         assert_frame_equal(data_expected, data_actual)
 
     # Case: input correct values

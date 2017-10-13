@@ -1,3 +1,6 @@
+# Files created through the unit test.
+src/test/data/output_*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

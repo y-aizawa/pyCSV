@@ -402,7 +402,7 @@ def csvcol_countEvery(source,keyColumnNumbers):
             int         :   csvファイルにした場合のデータの行数
             int         :   csvファイルにした場合のデータの列数  
 """
-def csvcol_fillRandomNumber(source, columnNumbers, digit, padingFlg, headerFlg):
+def csvcol_fillRandomNumber(source, columnNumbers, digit, paddingFlg, headerFlg):
     result = const.RESULT_COMPLETE      # ステータス
     msg = const.MSG_COMPLETE            # メッセージ
     newData = pandas.DataFrame()        # count結果をDataFrame形式にしたデータ
@@ -453,7 +453,7 @@ def csvcol_fillRandomNumber(source, columnNumbers, digit, padingFlg, headerFlg):
             randomIDs = random.sample(range(10**digit-1), k=countRecords)
 
             # 0でパディングし8ケタにする。
-            if padingFlg == True: randomIDs = [str(i).zfill(8) for i in randomIDs]
+            if paddingFlg == True: randomIDs = [str(i).zfill(8) for i in randomIDs]
 
             # 乱数で置き換える
             if headerFlg == True:

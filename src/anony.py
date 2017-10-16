@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import constants as const
 import csv_row
+import csv_file
 
 """
 機能   :  都道府県ごとにサンプリングをする
@@ -52,12 +53,12 @@ def anony_reagionalSampling (source, samplingRatio):
             return
         
         #データから都道府県コードを抽出
-        regionList = source["都道府県コード"].unique()
+        regionList = source["都道府県"].unique()
         
         #都道府県ごとのデータを抽出
         sourcesByRegion=[]
         for i in range(regionList.shape[0]):
-            data = source[source["都道府県コード"] == regionList[i]]
+            data = source[source["都道府県"] == regionList[i]]
             sourcesByRegion.append(data)
             
         #都道府県ごとにサンプリングする
@@ -86,27 +87,8 @@ def anony_reagionalSampling (source, samplingRatio):
         return result, msg, newData, countRows, countColumns
  
 if __name__ == '__main__':
-    source = pd.DataFrame([["01","2017-06-25","数","3","aaaaa","","23242","30","10","12100"],
-                               ["02","2017-06-26","理","2","bbbbb","","11111","20","20","10800"],
-                               ["01","2017-06-27","国","3","ccccc","","12893","90","50","10200"],
-                               ["03","2017-06-27","数","2","ddddd","","11111","60","30","10400"],
-                               ["04","2017-06-28","英","4","eeeee","","11111","50","30","23242"],
-                               ["01","2017-06-25","英","3","fffff","","23242","30","10","12100"],
-                               ["01","2017-06-26","社","2","ggggg","","11111","20","20","10800"],
-                               ["03","2017-06-27","国","3","hhhhh","","12893","90","50","10200"],
-                               ["02","2017-06-27","数","2","iiiii","","11111","60","30","10400"],
-                               ["01","2017-06-28","理","4","jjjjj","","11111","50","30","23242"],
-                               ["04","2017-06-25","社","3","kkkkk","","23242","30","10","12100"],
-                               ["04","2017-06-26","英","2","lllll","","11111","20","20","10800"],
-                               ["05","2017-06-27","国","3","mmmmm","","12893","90","50","10200"],
-                               ["02","2017-06-27","数","2","nnnnn","","11111","60","30","10400"],
-                               ["03","2017-06-28","社","4","ooooo","","11111","50","30","23242"],
-                               ["02","2017-06-25","理","3","ppppp","","23242","30","10","12100"],
-                               ["03","2017-06-26","刻","2","qqqqq","","11111","20","20","10800"],
-                               ["05","2017-06-27","国","3","rrrrr","","12893","90","50","10200"],
-                               ["02","2017-06-27","数","2","sssss","","11111","60","30","10400"],
-                               ["01","2017-06-28","英","4","ttttt","","11111","50","30","23242"]],
-    columns=["都道府県コード","集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
-
-    result, msg, newData, countRows, countColumns = anony_reagionalSampling(source, 0.5)
+    dataPath = r"test\data\sample_large_data.CSV"
+    result, msg, source, countRows, countColumns = csv_file.csvfl_csvToDataFrame (dataPath, 1)
+    
+    result, msg, newData, countRows, countColumns = anony_reagionalSampling(source, 0.01)
     print (newData)

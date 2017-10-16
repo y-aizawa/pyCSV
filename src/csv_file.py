@@ -52,18 +52,20 @@ def csvfl_csvToDataFrame (csvFullPath, existHeaderFlag):
             msg = const.MSG_ERR_INVALID_FORMAT_FILE
             return
 
-        # csvファイルを読み込み、DataFrameに変換する
-        tp = pandas.read_csv(csvFullPath, sep=const.CSV_SEP, encoding=const.CSV_ENCODING, dtype=str, header=None,
-                             skipinitialspace=True, keep_default_na=False, low_memory=False, chunksize=10000)
-        newData = pandas.concat(tp, ignore_index=True)
-
         # csvファイルにヘッダが無い場合、DataFrame(newData)のheaderには、1から始まる列番号を自動的に設定する
         if existHeaderFlag == 0:
-            header = pandas.DataFrame([range(1,newData.shape[1]+1 ,1)]).astype(str)
-            newData = pandas.concat([header,newData], ignore_index=True)
+            tp = pandas.read_csv(csvFullPath, sep=const.CSV_SEP, encoding=const.CSV_ENCODING, dtype=str, header=None,
+                                 skipinitialspace=True, keep_default_na=False, low_memory=False, chunksize=10000)
+            newData = pandas.concat(tp, ignore_index=True)
+            header = list(range(1, newData.shape[1]+1))
+            newData.columns = header
+        else:
+            tp = pandas.read_csv(csvFullPath, sep=const.CSV_SEP, encoding=const.CSV_ENCODING, dtype=str, header=0,
+                                 skipinitialspace=True, keep_default_na=False, low_memory=False, chunksize=10000)
+            newData = pandas.concat(tp, ignore_index=True)
 
+        countRows = newData.shape[0]+1
         countColumns = newData.shape[1]
-        countRows = newData.shape[0]
 
     # CSVファイルがない
     except OSError:
@@ -166,14 +168,13 @@ def csvfl_dataFrameToCsv (source, existHeaderFlag, ovwFlag, directory, csvName):
                 csvFullPath = path.join(directory, newName)
                 i+=1
 
-        # header行を出力しない
-        if existHeaderFlag == 0:
-            source.drop(source.index[0], inplace=True)
-
-        # DataFrame形式のデータをcsvファイルに出力する
-        source.to_csv(csvFullPath, sep=const.CSV_SEP, index=False, header=False, line_terminator=const.CSV_LINE_TERMINATOR,
-                      quotechar=const.CSV_QUOTECHAR, quoting=QUOTE_ALL, encoding=const.CSV_ENCODING, chunksize=10000)
-
+        # CSVファイル出力
+        if existHeaderFlag == 0: # header行を出力しない
+            source.to_csv(csvFullPath, sep=const.CSV_SEP, index=False, header=False, line_terminator=const.CSV_LINE_TERMINATOR,
+                          quotechar=const.CSV_QUOTECHAR, quoting=QUOTE_ALL, encoding=const.CSV_ENCODING, chunksize=10000)
+        else:
+            source.to_csv(csvFullPath, sep=const.CSV_SEP, index=False, header=True, line_terminator=const.CSV_LINE_TERMINATOR,
+                          quotechar=const.CSV_QUOTECHAR, quoting=QUOTE_ALL, encoding=const.CSV_ENCODING, chunksize=10000)
     # CSV ファイルが保存できない
     except PermissionError:
         result = const.RESULT_ERR
@@ -188,4 +189,7 @@ def csvfl_dataFrameToCsv (source, existHeaderFlag, ovwFlag, directory, csvName):
         return result, msg, newName
 
 if __name__=='__main__':
-    print("")
+    pass
+
+    
+    

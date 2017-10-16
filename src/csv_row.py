@@ -45,7 +45,7 @@ def csvrow_deleteRow(source, rowNumber):
             return
 
         # rowNumberがsourceの範囲を超えていた
-        if (rowNumber > source.shape[0] or rowNumber < 1):
+        if (rowNumber < 1 or source.shape[0] < rowNumber - 1):
             result = const.RESULT_ERR
             msg = const.MSG_ERR_OUT_OF_RANGE.format(const.NAME_ROW_NUMBER, rowNumber)
             return
@@ -56,16 +56,12 @@ def csvrow_deleteRow(source, rowNumber):
             msg = const.MSG_ERR_DELETE_HEADER_ROW
             return
 
-        # 2行目を削除したい場合[2]が渡されるので、-1する
-        source.drop(source.index[rowNumber-1], inplace=True)
+        # 1行目を削除したい場合[2]が渡されるので、-2する
+        source.drop(source.index[rowNumber-2], inplace=True)
         source.set_axis(0, range(source.shape[0]))
-        countRows = source.shape[0]
-        if(countRows == 0):
-            countColumns = 0
-            newData = pandas.DataFrame()
-        else:
-            countColumns = source.shape[1]
-            newData = source
+        countRows = source.shape[0]+1
+        countColumns = source.shape[1]
+        newData = source
 
     # 予期しなかったError
     except Exception:
@@ -117,7 +113,7 @@ def csvrow_deleteRows(source, rowNumbers):
             return
 
         #指定されたrowNumbersがsourceの範囲を超えていた
-        if(max(rowNumbers) > source.shape[0] or min(rowNumbers) < 1):
+        if(min(rowNumbers) < 1 or source.shape[0] < max(rowNumbers)-1 ):
             result = const.RESULT_ERR
             msg = const.MSG_ERR_OUT_OF_RANGE_LIST.format(const.NAME_ROW_NUMBER, const.NAME_ROW_NUMBERS, rowNumbers)
             return
@@ -128,15 +124,17 @@ def csvrow_deleteRows(source, rowNumbers):
             msg = const.MSG_ERR_DELETE_HEADER_ROW
             return
 
-        # 2行目を削除したい場合[2]が渡されるので、-1する
-        rowNumbers[:] = [x - 1 for x in rowNumbers]
+        # 2行目を削除したい場合[2]が渡される。DataFrame上は0行目なので、-2する
+        rowNumbers[:] = [x - 2 for x in rowNumbers]
         source.drop(source.index[rowNumbers], inplace=True)
         source.set_axis(0, range(source.shape[0]))
-        countRows = source.shape[0]
-        if(countRows == 0):
-            countColumns = 0
-            newData = pandas.DataFrame()
+
+        if source.shape[0] == 0 :
+            countRows = 1
+            countColumns = source.shape[1]
+            newData = pandas.DataFrame(columns=[source.columns])
         else:
+            countRows = source.shape[0]+1
             countColumns = source.shape[1]
             newData = source
 
@@ -186,17 +184,21 @@ def csvrow_sampling(source, samplingRatio):
             return
 
         # 指定されたsamplingRatioが0≦samplingRatio≦1の範囲外だった場合
-        if (samplingRatio < 0 or samplingRatio > 1):
+        if (samplingRatio <= 0 or samplingRatio >= 1):
             result = const.RESULT_ERR
             msg = const.MSG_ERR_OUT_OF_RANGE_SAMPLING.format(samplingRatio)
             return
-
-        numberOfSamples = math.ceil((source.shape[0] - 1) * samplingRatio)
+        
+        # サンプリング数を計算
+        numberOfSamples = math.ceil(source.shape[0] * samplingRatio)
+        
         # サンプリング対象Indexを取得
         tgtIndex = random.sample(range(1, source.shape[0]), numberOfSamples)
-        tgtIndex.insert(0, 0)
+        
+        # サンプリング
         newData = source.iloc[tgtIndex]
-        countRows = newData.shape[0]
+
+        countRows = newData.shape[0]+1
         countColumns = newData.shape[1]
 
     # 予期しなかったError
@@ -271,4 +273,5 @@ def csvrow_matchRowNumbers(source, targetColumnNumber, key):
         return result, msg, rowNumbers
 
 if __name__=='__main__':
-    print("")
+    result, msg, data_actual, countRows, countColumns = csvrow_deleteRow(source, 2)
+

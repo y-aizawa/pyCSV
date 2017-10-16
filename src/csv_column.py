@@ -394,7 +394,6 @@ def csvcol_countEvery(source,keyColumnNumbers):
             list        :   乱数で埋める列番号のlist
             int         :   乱数の桁数
             int         :   頭を０パディングするかどうかのフラグ True=する。False=しない。
-            int         :   ヘッダがあるかどうかのフラグ。True=有る。False=無い。無い場合、全ての行が乱数に置き換わる。
 戻り値  :
             int         :   ステータス
             string      :   メッセージ
@@ -402,7 +401,7 @@ def csvcol_countEvery(source,keyColumnNumbers):
             int         :   csvファイルにした場合のデータの行数
             int         :   csvファイルにした場合のデータの列数  
 """
-def csvcol_fillRandomNumber(source, columnNumbers, digit, paddingFlg, headerFlg):
+def csvcol_fillRandomNumber(source, columnNumbers, digit, paddingFlg):
     result = const.RESULT_COMPLETE      # ステータス
     msg = const.MSG_COMPLETE            # メッセージ
     newData = pandas.DataFrame()        # count結果をDataFrame形式にしたデータ
@@ -441,28 +440,22 @@ def csvcol_fillRandomNumber(source, columnNumbers, digit, paddingFlg, headerFlg)
         # 列番号をindexに変換するため-1。
         columnNumbers[:] = [x - 1 for x in columnNumbers]
 
-        # 置き換えるレコードの行数を計算
-        if headerFlg == True:
-            countRecords = source.shape[0]-1
-        else:
-            countRecords = source.shape[0]
-
         # 指定された列数分処理を行う
         for col in columnNumbers:
             # 8桁の乱数を生成 (ヘッダを引いた行数分)
-            randomIDs = random.sample(range(10**digit-1), k=countRecords)
+            randomIDs = random.sample(range(10**digit-1), k=source.shape[0])
             
             # 0でパディングし8ケタにする。
-            if paddingFlg == True: randomIDs = [str(i).zfill(8) for i in randomIDs]
+            if paddingFlg == True:
+                randomIDs = [str(i).zfill(8) for i in randomIDs]
+            else:
+                randomIDs = [str(i) for i in randomIDs]
 
             # 乱数で置き換える
-            if headerFlg == True:
-                source.iloc[1:,col] = randomIDs
-            else:
-                source.iloc[:,col] = randomIDs
+            source.iloc[:,col] = randomIDs
 
         newData = source
-        countRows = source.shape[0]
+        countRows = source.shape[0]+1
         countColumns = source.shape[1]
 
     # 予期しなかったError
@@ -481,7 +474,6 @@ def csvcol_fillRandomNumber(source, columnNumbers, digit, paddingFlg, headerFlg)
             list        :   乱数で埋める列番号のlist
             int         :   乱数の桁数
             int         :   頭を０パディングするかどうかのフラグ True=する。False=しない。
-            int         :   ヘッダがあるかどうかのフラグ。True=有る。False=無い。無い場合、全ての行が乱数に置き換わる。
 戻り値  :
             int         :   ステータス
             string      :   メッセージ
@@ -489,7 +481,7 @@ def csvcol_fillRandomNumber(source, columnNumbers, digit, paddingFlg, headerFlg)
             int         :   csvファイルにした場合のデータの行数
             int         :   csvファイルにした場合のデータの列数  
 """
-def csvcol_fillSequentialNumber(source, columnNumbers, digit, paddingFlg, headerFlg):
+def csvcol_fillSequentialNumber(source, columnNumbers, digit, paddingFlg):
     result = const.RESULT_COMPLETE      # ステータス
     msg = const.MSG_COMPLETE            # メッセージ
     newData = pandas.DataFrame()        # count結果をDataFrame形式にしたデータ
@@ -527,30 +519,23 @@ def csvcol_fillSequentialNumber(source, columnNumbers, digit, paddingFlg, header
             
         # 列番号をindexに変換するため-1。
         columnNumbers[:] = [x - 1 for x in columnNumbers]
-
-        # 置き換えるレコードの行数を計算
-        if headerFlg == True:
-            countRecords = source.shape[0]-1
-        else:
-            countRecords = source.shape[0]
         
         # 8桁の乱数を生成 (ヘッダを引いた行数分)
         # arangeの第２引数に、例えば10を指定すると9までの配列しかできないので0.1足している。
-        sequentialIDs = np.arange(1, countRecords+0.1, 1)
+        sequentialIDs = np.arange(1, source.shape[0]+1, 1)
 
         # 0でパディングし8ケタにする。
-        if paddingFlg == True: sequentialIDs = [str(i).zfill(8) for i in sequentialIDs]
-        
-                                                
+        if paddingFlg == True: 
+            sequentialIDs = [str(i).zfill(8) for i in sequentialIDs]
+        else:
+            sequentialIDs = [str(i) for i in sequentialIDs]
+
         # 指定された列数分処理を行う
         for col in columnNumbers:
-            if headerFlg == True:
-                source.iloc[1:,col] = sequentialIDs
-            else:
-                source.iloc[:,col] = sequentialIDs
+            source.iloc[:,col] = sequentialIDs
         
         newData = source
-        countRows = source.shape[0]
+        countRows = source.shape[0]+1
         countColumns = source.shape[1]
 
     # 予期しなかったError

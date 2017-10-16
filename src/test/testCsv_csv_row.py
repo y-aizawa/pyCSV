@@ -2,6 +2,8 @@
 """
 Unit test for csv_row.py
 """
+import sys
+sys.path.append('../') # 親ディレクトリの親ディレクトリを読み込む
 
 import unittest
 import time
@@ -90,8 +92,8 @@ class TestCsvFile(unittest.TestCase):
     # rowNumberがsourceの範囲を超えていた
     #TODO: rownumber > source's total row
     def testCsv_csvrow_deleteRow5(self):
-        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                   ["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"]])
+        source = pandas.DataFrame([["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"]],
+                                   columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
         data_expected = pandas.DataFrame()
 
         result, msg, data_actual, countRows, countColumns = csvrow_deleteRow(source, 3)
@@ -110,18 +112,18 @@ class TestCsvFile(unittest.TestCase):
 
     # Case: input correct values
     def testCsv_csvrow_deleteRow7(self):
-        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                  ["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
-                  ["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
-                  ["2017-06-27","国","3","内の要素","","12893","90","50","10200"],
-                  ["2017-06-27","数","2","ヤマグチケン","","11111","60","30","10400"],
-                  ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]])
+        source = pandas.DataFrame([["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+                                   ["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
+                                   ["2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                   ["2017-06-27","数","2","ヤマグチケン","","11111","60","30","10400"],
+                                   ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]],
+                                   columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
+        data_expected = pandas.DataFrame([["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
+                                          ["2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                          ["2017-06-27","数","2","ヤマグチケン","","11111","60","30","10400"],
+                                          ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]],
+                                          columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
 
-        data_expected = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                  ["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
-                  ["2017-06-27","国","3","内の要素","","12893","90","50","10200"],
-                  ["2017-06-27","数","2","ヤマグチケン","","11111","60","30","10400"],
-                  ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]])
         result, msg, data_actual, countRows, countColumns = csvrow_deleteRow(source, 2)
         self.assertEqual((1, "Complete.", 5, 9),(result, msg, countRows, countColumns))
         assert_frame_equal(data_expected, data_actual)
@@ -129,18 +131,17 @@ class TestCsvFile(unittest.TestCase):
     # Case: input correct values
     # TODO: Delete last row
     def testCsv_csvrow_deleteRow8(self):
-        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                   ["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+        source = pandas.DataFrame([["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
                                    ["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
                                    ["2017-06-27","国","3","内の要素","","12893","90","50","10200"],
                                    ["2017-06-27","数","2","ヤマグチケン","","11111","60","30","10400"],
-                                   ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]])
-
-        data_expected = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                          ["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+                                   ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]],
+                                   columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
+        data_expected = pandas.DataFrame([["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
                                           ["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
                                           ["2017-06-27","国","3","内の要素","","12893","90","50","10200"],
-                                          ["2017-06-27","数","2","ヤマグチケン","","11111","60","30","10400"]])
+                                          ["2017-06-27","数","2","ヤマグチケン","","11111","60","30","10400"]],
+                                          columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
         result, msg, data_actual, countRows, countColumns = csvrow_deleteRow(source, 6)
         self.assertEqual((1, "Complete.", 5, 9),(result, msg, countRows, countColumns))
         assert_frame_equal(data_expected, data_actual)
@@ -211,14 +212,16 @@ class TestCsvFile(unittest.TestCase):
     # 指定されたrowNumbersがsourceの範囲を超えていた
     #TODO: rownumbers > source's total row
     def testCsv_csvrow_deleteRows7(self):
-        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                   ["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+        source = pandas.DataFrame([["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
                                    ["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
-                                   ["2017-06-27","国","3","内の要素","","12893","90","50","10200"]])
+                                   ["2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                   ["2017-06-27","数","2","ヤマグチケン","","11111","60","30","10400"],
+                                   ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]],
+                                   columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
 
         data_expected = pandas.DataFrame()
-        result, msg, data_actual, countRows, countColumns = csvrow_deleteRows(source, [4,5])
-        self.assertEqual((0, "Error : The specified rowNumber in the rowNumbers was out of range. [[4, 5]]", 0, 0),(result, msg, countRows, countColumns))
+        result, msg, data_actual, countRows, countColumns = csvrow_deleteRows(source, [4,7])
+        self.assertEqual((0, "Error : The specified rowNumber in the rowNumbers was out of range. [[4, 7]]", 0, 0),(result, msg, countRows, countColumns))
         assert_frame_equal(data_expected, data_actual)
 
     # rowNumbersに「1」が含まれていた場合Errorとする
@@ -238,18 +241,17 @@ class TestCsvFile(unittest.TestCase):
     # Case: input correct values
     # TODO: delete 1 row
     def testCsv_csvrow_deleteRows9(self):
-        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                   ["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+        source = pandas.DataFrame([["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
                                    ["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
                                    ["2017-06-27","国","3","内の要素","","12893","90","50","10200"],
                                    ["2017-06-27","数","2","ヤマグチケン","","11111","60","30","10400"],
-                                   ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]])
-        data_expected = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                          ["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+                                   ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]],
+                                   columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
+        data_expected = pandas.DataFrame([["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
                                           ["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
                                           ["2017-06-27","国","3","内の要素","","12893","90","50","10200"],
-                                          ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]])
-
+                                          ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]],
+                                          columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
         result, msg, data_actual, countRows, countColumns = csvrow_deleteRows(source, [5])
         self.assertEqual((1, "Complete.", 5, 9),(result, msg, countRows, countColumns))
         assert_frame_equal(data_expected, data_actual)
@@ -257,15 +259,15 @@ class TestCsvFile(unittest.TestCase):
     # Case: input correct values
     # TODO: delete many rows
     def testCsv_csvrow_deleteRows10(self):
-        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                   ["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+        source = pandas.DataFrame([["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
                                    ["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
                                    ["2017-06-27","国","3","内の要素","","12893","90","50","10200"],
                                    ["2017-06-27","数","2","ヤマグチケン","","11111","60","30","10400"],
-                                   ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]])
-        data_expected = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                          ["2017-06-27","国","3","内の要素","","12893","90","50","10200"],
-                                          ["2017-06-27","数","2","ヤマグチケン","","11111","60","30","10400"]])
+                                   ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]],
+                                   columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
+        data_expected = pandas.DataFrame([["2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                          ["2017-06-27","数","2","ヤマグチケン","","11111","60","30","10400"]],
+                                          columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
 
         result, msg, data_actual, countRows, countColumns = csvrow_deleteRows(source, [2, 3, 6])
         self.assertEqual((1, "Complete.", 3, 9),(result, msg, countRows, countColumns))
@@ -274,14 +276,13 @@ class TestCsvFile(unittest.TestCase):
     # Case: input correct values
     # TODO: delete all rows
     def testCsv_csvrow_deleteRows11(self):
-        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                   ["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+        source = pandas.DataFrame([["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
                                    ["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
                                    ["2017-06-27","国","3","内の要素","","12893","90","50","10200"],
                                    ["2017-06-27","数","2","ヤマグチケン","","11111","60","30","10400"],
-                                   ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]])
-        data_expected = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"]])
-
+                                   ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]],
+                                   columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
+        data_expected = pandas.DataFrame(columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
         result, msg, data_actual, countRows, countColumns = csvrow_deleteRows(source, [2, 3, 4, 5, 6])
         self.assertEqual((1, "Complete.", 1, 9),(result, msg, countRows, countColumns))
         assert_frame_equal(data_expected, data_actual)
@@ -326,58 +327,83 @@ class TestCsvFile(unittest.TestCase):
         data_expected = pandas.DataFrame()
 
         result, msg, data_actual, countRows, countColumns = csvrow_sampling(source, -0.2)
-        self.assertEqual((0, "Error : The samplingRatio must be in range 0 to 1. [-0.2]", 0, 0),(result, msg, countRows, countColumns))
+        self.assertEqual((0, "Error : The samplingRatio must be more than 0 and less than 1. [-0.2]", 0, 0),(result, msg, countRows, countColumns))
         assert_frame_equal(data_expected, data_actual)
 
-    # 指定されたsamplingRatioが0≦samplingRatio≦1の範囲外だった場合（samplingRatio　＞　1）
-    def testCsv_csvrow_sampling5(self):
-        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                   ["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
-                                   ["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"]])
+
+    # 指定されたsamplingRatioが0<samplingRatio<1の範囲外だった場合（samplingRatio = 0）
+    def testCsv_csvrow_sampling6(self):
+        source = pandas.DataFrame([["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+                                   ["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
+                                   ["2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                   ["2017-06-27","数","2","ヤマグチケン","","11111","60","30","10400"],
+                                   ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]],
+                                   columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
+        result, msg, data_actual, countRows, countColumns = csvrow_sampling(source, 0.0)
+        self.assertEqual((0, 'Error : The samplingRatio must be more than 0 and less than 1. [0.0]', 0, 0),(result, msg, countRows, countColumns))
+
+    # 指定されたsamplingRatioが0<samplingRatio<1の範囲外だった場合（samplingRatio = 1）
+    def testCsv_csvrow_sampling7(self):
+        source = pandas.DataFrame([["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+                                   ["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
+                                   ["2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                   ["2017-06-27","数","2","ヤマグチケン","","11111","60","30","10400"],
+                                   ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]],
+                                   columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
+
+        result, msg, data_actual, countRows, countColumns = csvrow_sampling(source, 1.0)
+        self.assertEqual((0, 'Error : The samplingRatio must be more than 0 and less than 1. [1.0]', 0, 0),(result, msg, countRows, countColumns))
+
+    # 指定されたsamplingRatioが0<samplingRatio<1の範囲外だった場合（1≦samplingRatio）
+    def testCsv_csvrow_sampling8(self):
+        source = pandas.DataFrame([["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+                                   ["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
+                                   ["2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                   ["2017-06-27","数","2","ヤマグチケン","","11111","60","30","10400"],
+                                   ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]],
+                                   columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
         data_expected = pandas.DataFrame()
 
         result, msg, data_actual, countRows, countColumns = csvrow_sampling(source, 1.1)
-        self.assertEqual((0, "Error : The samplingRatio must be in range 0 to 1. [1.1]", 0, 0),(result, msg, countRows, countColumns))
+        self.assertEqual((0, "Error : The samplingRatio must be more than 0 and less than 1. [1.1]", 0, 0),(result, msg, countRows, countColumns))
         assert_frame_equal(data_expected, data_actual)
-
-    # Case: input correct values（samplingRatio　＝　0）
-    def testCsv_csvrow_sampling6(self):
-        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                   ["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
-                                   ["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
-                                   ["2017-06-27","国","3","内の要素","","12893","90","50","10200"],
-                                   ["2017-06-27","数","2","ヤマグチケン","","11111","60","30","10400"],
-                                   ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]])
-
-        data_expected = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"]])
-        result, msg, data_actual, countRows, countColumns = csvrow_sampling(source, 0.0)
-        self.assertEqual((1, "Complete.", 1, 9),(result, msg, countRows, countColumns))
-        assert_frame_equal(data_expected, data_actual)
-
-    # Case: input correct values（samplingRatio　＝　1）
-    def testCsv_csvrow_sampling7(self):
-        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                   ["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
-                                   ["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
-                                   ["2017-06-27","国","3","内の要素","","12893","90","50","10200"],
-                                   ["2017-06-27","数","2","ヤマグチケン","","11111","60","30","10400"],
-                                   ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]])
-
-        result, msg, data_actual, countRows, countColumns = csvrow_sampling(source, 1.0)
-        self.assertEqual((1, "Complete.", 6, 9),(result, msg, countRows, countColumns))
 
     # Case: input correct values(0　＜　samplingRatio　＜　1)
-    def testCsv_csvrow_sampling8(self):
-        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                   ["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+    def testCsv_csvrow_sampling9(self):
+        source = pandas.DataFrame([["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
                                    ["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
                                    ["2017-06-27","国","3","内の要素","","12893","90","50","10200"],
                                    ["2017-06-27","数","2","ヤマグチケン","","11111","60","30","10400"],
-                                   ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]])
+                                   ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]],
+                                   columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
 
         result, msg, data_actual, countRows, countColumns = csvrow_sampling(source, 0.5)
         self.assertEqual((1, "Complete.", 4, 9),(result, msg, countRows, countColumns))
 
+    # Case: input correct values(0　＜　samplingRatio　＜　1)
+    def testCsv_csvrow_sampling10(self):
+        source = pandas.DataFrame([["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+                                   ["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
+                                   ["2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                   ["2017-06-27","数","2","ヤマグチケン","","11111","60","30","10400"],
+                                   ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]],
+                                   columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
+
+        result, msg, data_actual, countRows, countColumns = csvrow_sampling(source, 0.2)
+        self.assertEqual((1, "Complete.", 2, 9),(result, msg, countRows, countColumns))        
+        
+    # Case: input correct values(0　＜　samplingRatio　＜　1)
+    def testCsv_csvrow_sampling11(self):
+        source = pandas.DataFrame([["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+                                   ["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
+                                   ["2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                   ["2017-06-27","数","2","ヤマグチケン","","11111","60","30","10400"],
+                                   ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]],
+                                   columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
+
+        result, msg, data_actual, countRows, countColumns = csvrow_sampling(source, 0.5)
+        self.assertEqual((1, "Complete.", 4, 9),(result, msg, countRows, countColumns)) 
+        
 # PG_34
     # sourceのformatが不正
     def testCsv_csvrow_matchRowNumbers1(self):

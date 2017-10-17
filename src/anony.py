@@ -82,7 +82,9 @@ def anony_reagionalSampling (source, samplingRatio):
         combinedSampledSource = combinedSampledSource.reindex(np.random.permutation(combinedSampledSource.index)).reset_index(drop=True)
         
         newData = combinedSampledSource
-        countRows = newData.shape[0]
+        
+        #行数はヘッダ付きでcsvに変換した際の行数とする為+1
+        countRows = newData.shape[0]+1
         countColumns = newData.shape[1]
         
     except Exception:

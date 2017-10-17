@@ -45,13 +45,19 @@ def anony_reagionalSampling (source, samplingRatio):
             result = const.RESULT_ERR
             msg = const.MSG_ERR_EMPTY_SOURCE
             return
+        
+        # sourceに都道府県列が存在しない
+        if not '都道府県' in source.columns:
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_INVALID_FORMAT_SOURCE
+            return
 
         # 指定されたsamplingRatioが0≦samplingRatio≦1の範囲外だった場合
-        if (samplingRatio < 0 or samplingRatio > 1):
+        if (samplingRatio <= 0 or samplingRatio >= 1):
             result = const.RESULT_ERR
             msg = const.MSG_ERR_OUT_OF_RANGE_SAMPLING.format(samplingRatio)
             return
-        
+
         #データから都道府県コードを抽出
         regionList = source["都道府県"].unique()
         
@@ -69,8 +75,8 @@ def anony_reagionalSampling (source, samplingRatio):
             
         #都道府県ごとにサンプリングしたデータを結合
         combinedSampledSource = sampledSources[0]
-        for i in range(regionList.shape[0]-1):
-            combinedSampledSource = pd.concat([combinedSampledSource,sampledSources[i+1]])
+        for i in range(1, regionList.shape[0]):
+            combinedSampledSource = pd.concat([combinedSampledSource,sampledSources[i]])
                 
         #結合したデータをシャッフルしてインデックスを振りなおす
         combinedSampledSource = combinedSampledSource.reindex(np.random.permutation(combinedSampledSource.index)).reset_index(drop=True)

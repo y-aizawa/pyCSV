@@ -189,11 +189,19 @@ def csvrow_sampling(source, samplingRatio):
             msg = const.MSG_ERR_OUT_OF_RANGE_SAMPLING.format(samplingRatio)
             return
         
-        # サンプリング数を計算
-        numberOfSamples = math.ceil(source.shape[0] * samplingRatio)
+        # サンプリング数を計算:
+        # 対象が1行しかない場合は、サンプリングしない。
+        if source.shape[0] == 1:
+            numberOfSamples = 0
+        # 小数点以下を切り上げする事で全対象をサンプリングしてしまう場合は、小数点以下を切り捨てとする。
+        elif source.shape[0] == math.ceil(source.shape[0] * samplingRatio):
+            numberOfSamples = math.floor(source.shape[0] * samplingRatio)
+        # 基本的に多めにサンプリングする為、小数点以下を切り上げる。
+        else:
+            numberOfSamples = math.ceil(source.shape[0] * samplingRatio)
         
         # サンプリング対象Indexを取得
-        tgtIndex = random.sample(range(1, source.shape[0]), numberOfSamples)
+        tgtIndex = random.sample(range(0, source.shape[0]), numberOfSamples)
         
         # サンプリング
         newData = source.iloc[tgtIndex]
@@ -273,5 +281,4 @@ def csvrow_matchRowNumbers(source, targetColumnNumber, key):
         return result, msg, rowNumbers
 
 if __name__=='__main__':
-    result, msg, data_actual, countRows, countColumns = csvrow_deleteRow(source, 2)
-
+    pass

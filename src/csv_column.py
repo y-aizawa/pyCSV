@@ -381,17 +381,34 @@ def csvcol_countEvery(source,keyColumnNumbers):
             result = const.RESULT_ERR
             msg = const.MSG_ERR_OUT_OF_RANGE.format(const.NAME_KEY_COLUMN_NUMBERS, keyColumnNumbers)
             return
-
-        source.set_axis(1, range(1, source.shape[1] + 1))
+        
+        # リストの重複を削除
+        keyColumnNumbers = list(set(keyColumnNumbers))
+            
+        # keyColumnNumbersを元にヘッダ名のリストを作成
+        headers = []
+        for key in keyColumnNumbers:
+            result, msg, headerName = csvcol_getHeaderName(source, key)
+            headers.append(headerName)
+            
+        #source.set_axis(1, range(1, source.shape[1] + 1))
         #newData = pandas.DataFrame(source.groupby(keyUnique, sort=False).size()).reset_index().astype(str)
-        newData = source.groupby(keyUnique, sort=False)
-        print("---------------")
-        print(keyUnique)
-        print(newData)
-        newData.set_axis(1, range(newData.shape[1]))
+        
+        # 指定されたヘッダでグルーピングしサイズを数える        
+        newData = source.groupby(headers, sort=False).size().reset_index().astype(str)
+        # ヘッダの末尾にcountを追加
+        headers.append(HEADER_NAME_COUNT)
+        # ヘッダを設定
+        newData.columns = headers
+        
+        #for col in keyColumnNumbers:
+        #header = [headerName : result, msg, headerName = csvcol_getHeaderName(source, 0)]
+        
+        #newData.set_axis(1, range(newData.shape[1]))
         countRows = newData.shape[0] + 1
         countColumns = newData.shape[1]
-        newData.iloc[0, countColumns-1] = HEADER_NAME_COUNT
+
+        #newData.iloc[0, countColumns-1] = HEADER_NAME_COUNT
 
     # 予期しなかったError
     except Exception:
@@ -561,9 +578,4 @@ def csvcol_fillSequentialNumber(source, columnNumbers, digit, paddingFlg):
         return result, msg, newData, countRows, countColumns
         
 if __name__=='__main__':
-    
-    source = pandas.DataFrame([["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
-                               ["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"]],
-                               columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
-    result, msg, data_actual, countRows, countColumns = csvcol_deleteColumns(source, [4,5,6])
-    print(data_actual)
+    pass

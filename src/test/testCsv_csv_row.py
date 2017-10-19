@@ -404,6 +404,24 @@ class TestCsvFile(unittest.TestCase):
         result, msg, data_actual, countRows, countColumns = csvrow_sampling(source, 0.5)
         self.assertEqual((1, "Complete.", 4, 9),(result, msg, countRows, countColumns)) 
         
+    # Case: input correct values(0　＜　samplingRatio　＜　1)
+    def testCsv_csvrow_sampling12(self):
+        source = pandas.DataFrame([["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]],
+                                   columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
+        result, msg, data_actual, countRows, countColumns = csvrow_sampling(source, 0.5)
+        self.assertEqual((1, "Complete.", 1, 9),(result, msg, countRows, countColumns)) 
+
+   # Case: input correct values(0　＜　samplingRatio　＜　1)
+    def testCsv_csvrow_sampling13(self):
+        source = pandas.DataFrame([["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+                                   ["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
+                                   ["2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                   ["2017-06-27","数","2","ヤマグチケン","","11111","60","30","10400"],
+                                   ["2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]],
+                                   columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
+        result, msg, data_actual, countRows, countColumns = csvrow_sampling(source, 0.99)
+        self.assertEqual((1, "Complete.", 5, 9),(result, msg, countRows, countColumns)) 
+        
 # PG_34
     # sourceのformatが不正
     def testCsv_csvrow_matchRowNumbers1(self):

@@ -39,11 +39,11 @@ class TestCsvColumn(unittest.TestCase):
         result, msg, headerColumnNumber = csvcol_getHeaderColumnNumber(source, "町村")
         self.assertEqual((1, "Complete.", 4), (result, msg, headerColumnNumber))
 
-        #result, msg, data_actual, countRows, countColumns = csvcol_countEvery(source, [2,5])
-        #self.assertEqual((1, "Complete.", 48, 3), (result, msg, countRows, countColumns)) 
+        result, msg, data_actual, countRows, countColumns = csvcol_countEvery(source, [2,5])
+        self.assertEqual((1, "Complete.", 48, 3), (result, msg, countRows, countColumns)) 
 
-        #result, msg, newName = csvfl_dataFrameToCsv (data_actual, 1, True, dataDir, "output_csvcol_combined_test_1.csv")
-        #self.assertEqual((1, "Complete.",  "output_csvcol_combined_test_1.csv"), (result, msg, newName))        
+        result, msg, newName = csvfl_dataFrameToCsv (data_actual, 1, True, dataDir, "output_csvcol_combined_test_1.csv")
+        self.assertEqual((1, "Complete.",  "output_csvcol_combined_test_1.csv"), (result, msg, newName))        
         
         result, msg, data_actual, countRows, countColumns = csvcol_deleteColumns(source, [6,4,2])
         self.assertEqual((1, "Complete.", countRows, 4), (result, msg, countRows, countColumns))

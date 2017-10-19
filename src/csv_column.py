@@ -35,29 +35,23 @@ def csvcol_getHeaderColumnNumber(source, headerName):
            raise Exception
 
         # sourceがNULL
-        if not source.shape[0]:
+        if not source.shape[0] and not source.shape[1]:
             result = const.RESULT_ERR
             msg = const.MSG_ERR_EMPTY_SOURCE
             return
 
-        #i = 0
-        #while (i < source.shape[1]):
-        #    if(headerName == source.iloc[0, i]):
-        #        headerColumnNumber = i + 1
-        #        break
-        #    i = i + 1
-        headerColumnNumber = -1
-        for i, name in enumerate(source.columns.values):
-            if headerName == name:
+        i = 0
+        while (i < source.shape[1]):
+            if(headerName == source.columns[i]):
                 headerColumnNumber = i + 1
                 break
+            i += 1
 
         # headerが見つからない
-        if (headerColumnNumber == -1):
+        if (headerColumnNumber == 0):
             result = const.RESULT_ERR
-            headerColumnNumber = 0
             msg = const.MSG_ERR_NOT_FOUND_HEADER_NAME.format(headerName)
-            
+
     # 予期しなかったError
     except Exception:
         result = const.RESULT_ERR_UNEXPECTED
@@ -93,7 +87,7 @@ def csvcol_getHeaderName(source, headerColumnNumber):
            raise Exception
 
         # sourceがNULL
-        if not source.shape[0]:
+        if not source.shape[0] and not source.shape[1]:
             result = const.RESULT_ERR
             msg = const.MSG_ERR_EMPTY_SOURCE
             return
@@ -105,7 +99,6 @@ def csvcol_getHeaderName(source, headerColumnNumber):
             return
 
         # 処理が問題なく完了した
-        #headerName = source.iloc[0, headerColumnNumber-1]
         headerName = source.columns.values[headerColumnNumber-1]
 
     # 予期しなかったError
@@ -147,7 +140,7 @@ def csvcol_deleteColumn(source, columnNumber):
            raise Exception
 
         # sourceがNULL
-        if not source.shape[0]:
+        if not source.shape[0] and not source.shape[1]:
             result = const.RESULT_ERR
             msg = const.MSG_ERR_EMPTY_SOURCE
             return
@@ -160,7 +153,6 @@ def csvcol_deleteColumn(source, columnNumber):
 
         #2列目を削除したい場合[2]が渡されるので、-1する
         source.drop(source.columns[columnNumber-1], axis=1, inplace=True)
-        #source.set_axis(1, range(source.shape[1]))
         countColumns = source.shape[1]
         if(countColumns == 0):
             countRows = 0
@@ -213,7 +205,7 @@ def csvcol_deleteColumns(source, columnNumbers):
             raise Exception
 
         # sourceがNULL
-        if not source.shape[0]:
+        if not source.shape[0] and not source.shape[1]:
             result = const.RESULT_ERR
             msg = const.MSG_ERR_EMPTY_SOURCE
             return
@@ -227,13 +219,12 @@ def csvcol_deleteColumns(source, columnNumbers):
         # 2列目を削除したい場合[2]が渡されるので、-1する
         columnNumbers[:] = [x - 1 for x in columnNumbers]
         source.drop(source.columns[columnNumbers], axis=1, inplace=True)
-        #source.set_axis(1, range(source.shape[1]))
         countColumns = source.shape[1]
         if(countColumns == 0):
             countRows = 0
             newData = pandas.DataFrame()
         else:
-            countRows = source.shape[0]+1
+            countRows = source.shape[0] + 1
             newData = source
 
     # 予期しなかったError
@@ -286,7 +277,7 @@ def csvcol_duplicateColumn(source, columnNumber_From, columnNumber_To, headerNam
            raise Exception
 
         # sourceがNULL
-        if not source.shape[0]:
+        if not source.shape[0] and not source.shape[1]:
             result = const.RESULT_ERR
             msg = const.MSG_ERR_EMPTY_SOURCE
             return
@@ -309,20 +300,15 @@ def csvcol_duplicateColumn(source, columnNumber_From, columnNumber_To, headerNam
 
         result1, msg1, headerColumnNumber = csvcol_getHeaderColumnNumber(source, headerName_To)
         # headerName_Toで指定されたヘッダ名が既に存在していた場合
-        if headerColumnNumber > 0:
+        if headerColumnNumber != 0:
             result = const.RESULT_ERR
             msg = const.MSG_ERR_HEADER_NAME_DUPLICATED.format(headerName_To)
             return
-                   
-        #source.insert(columnNumber_To - 1, source.shape[1], source.iloc[:, columnNumber_From - 1])
-        source.insert(loc=columnNumber_To - 1, column=headerName_To, value=source.iloc[:, columnNumber_From - 1])
 
-        #source.iloc[0, columnNumber_To - 1] = headerName_To
-        #source.set_axis(1, range(source.shape[1]))
-        
+        source.insert(columnNumber_To - 1, headerName_To, source.iloc[:, columnNumber_From - 1])
         newData = source
-        countRows = source.shape[0]+1
-        countColumns = source.shape[1]
+        countRows = newData.shape[0] + 1
+        countColumns = newData.shape[1]
 
     # 予期しなかったError
     except Exception:
@@ -361,7 +347,7 @@ def csvcol_countEvery(source,keyColumnNumbers):
             return
 
         # sourceがNULL
-        if not source.shape[0]:
+        if not source.shape[0] and not source.shape[1]:
             result = const.RESULT_ERR
             msg = const.MSG_ERR_EMPTY_SOURCE
             return
@@ -375,40 +361,18 @@ def csvcol_countEvery(source,keyColumnNumbers):
         # [keyUnique] 内の要素が[int]のデータ型以外の場合
         if not all(type(item) is int for item in keyUnique):
             raise Exception
-            
+
         # keyUniqueがsourceの範囲を超えていた
         if (source.shape[1] < max(keyUnique) or min(keyUnique) < 1):
             result = const.RESULT_ERR
             msg = const.MSG_ERR_OUT_OF_RANGE.format(const.NAME_KEY_COLUMN_NUMBERS, keyColumnNumbers)
             return
-        
-        # リストの重複を削除
-        keyColumnNumbers = list(set(keyColumnNumbers))
-            
-        # keyColumnNumbersを元にヘッダ名のリストを作成
-        headers = []
-        for key in keyColumnNumbers:
-            result, msg, headerName = csvcol_getHeaderName(source, key)
-            headers.append(headerName)
-            
-        #source.set_axis(1, range(1, source.shape[1] + 1))
-        #newData = pandas.DataFrame(source.groupby(keyUnique, sort=False).size()).reset_index().astype(str)
-        
-        # 指定されたヘッダでグルーピングしサイズを数える        
-        newData = source.groupby(headers, sort=False).size().reset_index().astype(str)
-        # ヘッダの末尾にcountを追加
-        headers.append(HEADER_NAME_COUNT)
-        # ヘッダを設定
-        newData.columns = headers
-        
-        #for col in keyColumnNumbers:
-        #header = [headerName : result, msg, headerName = csvcol_getHeaderName(source, 0)]
-        
-        #newData.set_axis(1, range(newData.shape[1]))
+
+        keyUnique[:] = [x - 1 for x in keyUnique]
+        newData = pandas.DataFrame(source.groupby(source.columns[keyUnique].tolist(), sort=False).size(), dtype=str).reset_index()
         countRows = newData.shape[0] + 1
         countColumns = newData.shape[1]
-
-        #newData.iloc[0, countColumns-1] = HEADER_NAME_COUNT
+        newData.rename(columns={0: HEADER_NAME_COUNT}, inplace=True)
 
     # 予期しなかったError
     except Exception:
@@ -418,6 +382,115 @@ def csvcol_countEvery(source,keyColumnNumbers):
     finally:
         return result, msg, newData, countRows, countColumns
 
+"""
+機能   :    columnNumbers (list)で指定した複数の列番号以外の列を削除する
+引数   :
+            DataFrame   :   DataFrame形式のデータ
+            list        :   削除する列番号のlist
+戻り値  :
+            int         :   ステータス
+            string      :   メッセージ
+            DataFrame   :   列削除後のDataFrame形式のデータ
+            int         :   csvファイルにした場合のデータの行数
+            int         :   csvファイルにした場合のデータの列数
+"""
+def csvcol_deleteColumnsExcept(source, columnNumbers):
+    result = const.RESULT_COMPLETE      # ステータス
+    msg = const.MSG_COMPLETE            # メッセージ
+    newData = pandas.DataFrame()        # 列削除後のDataFrame形式のデータ
+    countRows = 0                       # csvファイルにした場合のデータの行数
+    countColumns = 0                    # csvファイルにした場合のデータの列数
+
+    try:
+        # sourceのformatが不正
+        if type(source) is not pandas.core.frame.DataFrame:
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_INVALID_FORMAT_SOURCE
+            return
+
+        # sourceがNULL
+        if not source.shape[0] and not source.shape[1]:
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_EMPTY_SOURCE
+            return
+
+        # [columnNumbers]が[list]のデータ型以外の場合
+        # columnNumbersがNULL
+        if (type(columnNumbers) is not list) or (not len(columnNumbers)):
+            raise Exception
+
+        columnUnique = np.unique(columnNumbers).tolist()
+        # [columnUnique] 内の要素が[int]のデータ型以外の場合
+        if not all(type(item) is int for item in columnUnique):
+            raise Exception
+
+        # columnUniqueがsourceの範囲を超えていた
+        if (source.shape[1] < max(columnUnique) or min(columnUnique) < 1):
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_OUT_OF_RANGE_LIST.format(const.NAME_COLUMN_NUMBER, const.NAME_COLUMN_NUMBERS, columnNumbers)
+            return
+
+        columnNumbers[:] = [x - 1 for x in columnUnique]
+        newData = source.iloc[ : , columnNumbers]
+        countRows = newData.shape[0] + 1
+        countColumns = newData.shape[1]
+
+    # 予期しなかったError
+    except Exception:
+        result = const.RESULT_ERR_UNEXPECTED
+        msg = const.MSG_ERR_UNEXPECTED
+
+    finally:
+        return result, msg, newData, countRows, countColumns
+
+"""
+機能   :    headerNameとheader名が部分一致する列番号のリストを取得する
+引数   :
+            DataFrame   :   DataFrame形式のデータ
+            string      :   header名称
+戻り値  :
+            int         :   ステータス
+            string      :   メッセージ
+            list        :   headerのcolumnNumberのlist
+"""
+def csvcol_getHeaderColumnNumberPartialMatch(source, headerName):
+    result = const.RESULT_COMPLETE      # ステータス
+    msg = const.MSG_COMPLETE            # メッセージ
+    headerColumnNumber = []             # headerのcolumnNumberのlist
+
+    try:
+        # sourceのformatが不正
+        if type(source) is not pandas.core.frame.DataFrame:
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_INVALID_FORMAT_SOURCE
+            return
+
+        # sourceがNULL
+        if not source.shape[0] and not source.shape[1]:
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_EMPTY_SOURCE
+            return
+
+        # [headerName]が[string]のデータ型以外の場合
+        # [headerName]が空白の場合
+        if type(headerName) is not str or not len(headerName):
+            raise Exception
+
+        # 処理が問題なく完了した
+        headerColumnNumber = [c + 1 for c in range(source.shape[1]) if headerName in source.columns[c]]
+
+        # headerの部分一致がみつからない
+        if not headerColumnNumber:
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_NOT_FOUND_HEADER_NAME.format(headerName)
+
+    # 予期しなかったError
+    except Exception:
+        result = const.RESULT_ERR_UNEXPECTED
+        msg = const.MSG_ERR_UNEXPECTED
+
+    finally:
+        return result, msg, headerColumnNumber
 """
 機能   :    columnNumbers (list)で指定した複数列の値を乱数で埋める。
 引数   :

@@ -29,6 +29,7 @@ def csvfl_csvToDataFrame (csvFullPath, existHeaderFlag):
     newData = pandas.DataFrame()        # DataFrameに変換したデータ
     countRows = 0                       # csvファイル内のデータの行数
     countColumns = 0                    # csvファイル内のデータの列数
+
     try:
         # [csvFullPath]が[string]のデータ型以外の場合
         if type(csvFullPath) is not str:
@@ -57,14 +58,13 @@ def csvfl_csvToDataFrame (csvFullPath, existHeaderFlag):
             tp = pandas.read_csv(csvFullPath, sep=const.CSV_SEP, encoding=const.CSV_ENCODING, dtype=str, header=None,
                                  skipinitialspace=True, keep_default_na=False, low_memory=False, chunksize=10000)
             newData = pandas.concat(tp, ignore_index=True)
-            header = list(range(1, newData.shape[1]+1))
-            newData.columns = header
+            newData.set_axis(1, range(1, newData.shape[1] + 1))
         else:
             tp = pandas.read_csv(csvFullPath, sep=const.CSV_SEP, encoding=const.CSV_ENCODING, dtype=str, header=0,
                                  skipinitialspace=True, keep_default_na=False, low_memory=False, chunksize=10000)
             newData = pandas.concat(tp, ignore_index=True)
 
-        countRows = newData.shape[0]+1
+        countRows = newData.shape[0] + 1
         countColumns = newData.shape[1]
 
     # CSVファイルがない
@@ -133,7 +133,7 @@ def csvfl_dataFrameToCsv (source, existHeaderFlag, ovwFlag, directory, csvName):
         newName = csvName.strip()
 
         # sourceがNULL
-        if not source.shape[0]:
+        if not source.shape[0] and not source.shape[1]:
             result = const.RESULT_ERR
             msg = const.MSG_ERR_EMPTY_SOURCE
             return
@@ -175,6 +175,7 @@ def csvfl_dataFrameToCsv (source, existHeaderFlag, ovwFlag, directory, csvName):
         else:
             source.to_csv(csvFullPath, sep=const.CSV_SEP, index=False, header=True, line_terminator=const.CSV_LINE_TERMINATOR,
                           quotechar=const.CSV_QUOTECHAR, quoting=QUOTE_ALL, encoding=const.CSV_ENCODING, chunksize=10000)
+
     # CSV ファイルが保存できない
     except PermissionError:
         result = const.RESULT_ERR
@@ -190,6 +191,3 @@ def csvfl_dataFrameToCsv (source, existHeaderFlag, ovwFlag, directory, csvName):
 
 if __name__=='__main__':
     pass
-
-    
-    

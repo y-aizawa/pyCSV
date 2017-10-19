@@ -384,9 +384,9 @@ def csvcol_countEvery(source,keyColumnNumbers):
 
         source.set_axis(1, range(1, source.shape[1] + 1))
         #newData = pandas.DataFrame(source.groupby(keyUnique, sort=False).size()).reset_index().astype(str)
-        newData = pandas.DataFrame(source.groupby(keyUnique, sort=False).size()).reset_index().astype(str)
+        newData = source.groupby(keyUnique, sort=False)
         print("---------------")
-        
+        print(keyUnique)
         print(newData)
         newData.set_axis(1, range(newData.shape[1]))
         countRows = newData.shape[0] + 1

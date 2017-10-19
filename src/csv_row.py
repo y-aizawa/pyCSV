@@ -7,6 +7,7 @@ import pandas
 import constants as const
 import math
 import random
+import numpy as np
 
 """
 機能   :  指定した行を削除する
@@ -39,13 +40,13 @@ def csvrow_deleteRow(source, rowNumber):
            raise Exception
 
         # sourceがNULL
-        if not source.shape[0]:
+        if not source.shape[0] and not source.shape[1]:
             result = const.RESULT_ERR
             msg = const.MSG_ERR_EMPTY_SOURCE
             return
 
         # rowNumberがsourceの範囲を超えていた
-        if (rowNumber < 1 or source.shape[0] < rowNumber - 1):
+        if (rowNumber > (source.shape[0] + 1) or rowNumber < 1):
             result = const.RESULT_ERR
             msg = const.MSG_ERR_OUT_OF_RANGE.format(const.NAME_ROW_NUMBER, rowNumber)
             return
@@ -56,12 +57,12 @@ def csvrow_deleteRow(source, rowNumber):
             msg = const.MSG_ERR_DELETE_HEADER_ROW
             return
 
-        # 1行目を削除したい場合[2]が渡されるので、-2する
-        source.drop(source.index[rowNumber-2], inplace=True)
+        # 2行目を削除したい場合[2]が渡されるので、-2する
+        source.drop(source.index[rowNumber - const.PANDAS_FIRST_ROW_INDEX], inplace=True)
         source.set_axis(0, range(source.shape[0]))
-        countRows = source.shape[0]+1
-        countColumns = source.shape[1]
         newData = source
+        countRows = newData.shape[0] + 1
+        countColumns = newData.shape[1]
 
     # 予期しなかったError
     except Exception:
@@ -107,13 +108,13 @@ def csvrow_deleteRows(source, rowNumbers):
             raise Exception
 
         # sourceがNULL
-        if not source.shape[0]:
+        if not source.shape[0] and not source.shape[1]:
             result = const.RESULT_ERR
             msg = const.MSG_ERR_EMPTY_SOURCE
             return
 
         #指定されたrowNumbersがsourceの範囲を超えていた
-        if(min(rowNumbers) < 1 or source.shape[0] < max(rowNumbers)-1 ):
+        if (max(rowNumbers) > (source.shape[0] + 1) or min(rowNumbers) < 1):
             result = const.RESULT_ERR
             msg = const.MSG_ERR_OUT_OF_RANGE_LIST.format(const.NAME_ROW_NUMBER, const.NAME_ROW_NUMBERS, rowNumbers)
             return
@@ -124,19 +125,13 @@ def csvrow_deleteRows(source, rowNumbers):
             msg = const.MSG_ERR_DELETE_HEADER_ROW
             return
 
-        # 2行目を削除したい場合[2]が渡される。DataFrame上は0行目なので、-2する
-        rowNumbers[:] = [x - 2 for x in rowNumbers]
+        # 2行目を削除したい場合[2]が渡されるので、-2する
+        rowNumbers[:] = [x - const.PANDAS_FIRST_ROW_INDEX for x in rowNumbers]
         source.drop(source.index[rowNumbers], inplace=True)
         source.set_axis(0, range(source.shape[0]))
-
-        if source.shape[0] == 0 :
-            countRows = 1
-            countColumns = source.shape[1]
-            newData = pandas.DataFrame(columns=[source.columns])
-        else:
-            countRows = source.shape[0]+1
-            countColumns = source.shape[1]
-            newData = source
+        newData = source
+        countRows = newData.shape[0] + 1
+        countColumns = newData.shape[1]
 
     # 予期しなかったError
     except Exception:
@@ -148,7 +143,7 @@ def csvrow_deleteRows(source, rowNumbers):
 
 """
 機能   :  samplingRatioに従って、sourceの中から要素をsamplingする
-          samplingする際は、重複しない疑似乱数を用いたランダンプサンプリングを行う
+         samplingする際は、重複しない疑似乱数を用いたランダンプサンプリングを行う
 引数   :
             DataFrame   :   DataFrame形式のデータ
             float       :   samplingの割合 (e.g.: 10%の場合-.1、1%の場合0.01)
@@ -178,7 +173,7 @@ def csvrow_sampling(source, samplingRatio):
             raise Exception
 
         # sourceがNULL
-        if not source.shape[0]:
+        if not source.shape[0] and not source.shape[1]:
             result = const.RESULT_ERR
             msg = const.MSG_ERR_EMPTY_SOURCE
             return
@@ -188,8 +183,8 @@ def csvrow_sampling(source, samplingRatio):
             result = const.RESULT_ERR
             msg = const.MSG_ERR_OUT_OF_RANGE_SAMPLING.format(samplingRatio)
             return
-        
-        # サンプリング数を計算:
+
+		# サンプリング数を計算:
         # 対象が1行しかない場合は、サンプリングしない。
         if source.shape[0] == 1:
             numberOfSamples = 0
@@ -205,8 +200,7 @@ def csvrow_sampling(source, samplingRatio):
         
         # サンプリング
         newData = source.iloc[tgtIndex]
-
-        countRows = newData.shape[0]+1
+        countRows = newData.shape[0] + 1
         countColumns = newData.shape[1]
 
     # 予期しなかったError
@@ -250,7 +244,7 @@ def csvrow_matchRowNumbers(source, targetColumnNumber, key):
         key = key.strip()
 
         # sourceがNULL
-        if not source.shape[0]:
+        if not source.shape[0] and not source.shape[1]:
             result = const.RESULT_ERR
             msg = const.MSG_ERR_EMPTY_SOURCE
             return
@@ -262,7 +256,7 @@ def csvrow_matchRowNumbers(source, targetColumnNumber, key):
             return
 
         source.set_axis(0, range(source.shape[0]))
-        recordIndexes = source[source.iloc[:, targetColumnNumber-1] == key].index + 1
+        recordIndexes = source[source.iloc[:, targetColumnNumber-1] == key].index + const.PANDAS_FIRST_ROW_INDEX
         # keyと一致する列が一つもなかった
         if (len(recordIndexes) == 0):
             result = const.RESULT_ERR
@@ -279,6 +273,70 @@ def csvrow_matchRowNumbers(source, targetColumnNumber, key):
 
     finally:
         return result, msg, rowNumbers
+
+"""
+機能   :  rowNumbers(list)で指定した複数の行番号以外の行を削除する
+          rowNumbersに1（ヘッダ行を表す行番号）が無い場合は、1があるものとして処理を行う
+          つまりrowNumbers =[2,4]と指定された場合rowNumbers =[1,2,4]として処理を行う
+引数   :
+            DataFrame   :   DataFrame形式のデータ
+            list        :   削除する行番号のlist
+戻り値  :
+            int         :   ステータス
+            string      :   メッセージ
+            DataFrame   :   行削除後のDataFrame形式のデータ
+            int         :   header有で、csvファイルにしたときのデータの行数
+            int         :   csvファイルにしたときのデータの列数
+"""
+def csvrow_deleteRowsExcept(source, rowNumbers):
+    result = const.RESULT_COMPLETE      # ステータス
+    msg = const.MSG_COMPLETE            # メッセージ
+    newData = pandas.DataFrame()        # 行削除後のDataFrame形式のデータ
+    countRows = 0                       # header有で、csvファイルにしたときのデータの行数
+    countColumns = 0                    # csvファイルにしたときのデータの列数
+
+    try:
+        # sourceのformatが不正
+        if type(source) is not pandas.core.frame.DataFrame:
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_INVALID_FORMAT_SOURCE
+            return
+
+        # sourceがNULL
+        if not source.shape[0] and not source.shape[1]:
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_EMPTY_SOURCE
+            return
+
+        # [rowNumbers]が[list]のデータ型以外の場合
+        # rowNumbersがNULL
+        if (type(rowNumbers) is not list) or (not len(rowNumbers)):
+            raise Exception
+
+        rowUnique = np.unique(rowNumbers).tolist()
+        # [rowUnique] 内の要素が[int]のデータ型以外の場合
+        if not all(type(item) is int for item in rowUnique):
+            raise Exception
+
+        # 指定されたrowUniqueがsourceの範囲を超えていた
+        if(max(rowUnique) > (source.shape[0] + 1) or min(rowUnique) < 1):
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_OUT_OF_RANGE_LIST.format(const.NAME_ROW_NUMBER, const.NAME_ROW_NUMBERS, rowNumbers)
+            return
+
+        rowNumbers[:] = [x - const.PANDAS_FIRST_ROW_INDEX for x in rowUnique if x != 1]
+        newData = source.iloc[rowNumbers]
+        newData.set_axis(0, range(newData.shape[0]))
+        countRows = newData.shape[0] + 1
+        countColumns = newData.shape[1]
+
+    # 予期しなかったError
+    except Exception:
+        result = const.RESULT_ERR_UNEXPECTED
+        msg = const.MSG_ERR_UNEXPECTED
+
+    finally:
+        return result, msg, newData, countRows, countColumns
 
 if __name__=='__main__':
     pass

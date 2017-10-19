@@ -97,6 +97,7 @@ class TestCsvFile(unittest.TestCase):
         data_expected = pandas.DataFrame([["2017-06-25","国","2","M","","12893","0","0","12893"],
                                           ["2017-06-25","国","3","短","","12893","0","0","0"]],
                                           columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
+
         result, msg, data_actual, countRows, countColumns = csvfl_csvToDataFrame (csvFullPath, 1)
         self.assertEqual((1, "Complete.", 3, 9), (result, msg, countRows, countColumns))
         assert_frame_equal(data_expected, data_actual)
@@ -107,6 +108,7 @@ class TestCsvFile(unittest.TestCase):
                                            ["2017-06-25","国","2","M","","12893","0","0","12893"],
                                            ["2017-06-25","国","3","短","","12893","0","0","0"]],
                                            columns=[1,2,3,4,5,6,7,8,9])
+
         result, msg, data_actual, countRows, countColumns = csvfl_csvToDataFrame (csvFullPath, 0)
         self.assertEqual((1, "Complete.", 4, 9), (result, msg, countRows, countColumns))
         assert_frame_equal(data_expected, data_actual)
@@ -128,7 +130,7 @@ class TestCsvFile(unittest.TestCase):
 
         # [existHeaderFlag]が[int]のデータ型以外の場合
     def testCsvfl_dataFrameToCsv_3(self):
-        source  = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
+        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
                                     ["2017-06-25","国","2","M","","12893","0","0","12893"],
                                     ["2017-06-25","国","3","短","","12893","0","0","0"]])
 
@@ -137,7 +139,7 @@ class TestCsvFile(unittest.TestCase):
 
     # [existHeaderFlag]が[int]のデータ型であり、且つ０、１以外の場合
     def testCsvfl_dataFrameToCsv_4(self):
-        source  = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
+        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
                                     ["2017-06-25","国","2","M","","12893","0","0","12893"],
                                     ["2017-06-25","国","3","短","","12893","0","0","0"]])
 
@@ -146,7 +148,7 @@ class TestCsvFile(unittest.TestCase):
 
     # [ovwFlag]が[bool]のデータ型以外の場合
     def testCsvfl_dataFrameToCsv_5(self):
-        source  = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
+        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
                                     ["2017-06-25","国","2","M","","12893","0","0","12893"],
                                     ["2017-06-25","国","3","短","","12893","0","0","0"]])
 
@@ -155,7 +157,7 @@ class TestCsvFile(unittest.TestCase):
 
     # [ovwFlag]が[int]のデータ型であり、且つ０、１以外の場合
     def testCsvfl_dataFrameToCsv_6(self):
-        source  = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
+        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
                                     ["2017-06-25","国","2","M","","12893","0","0","12893"],
                                     ["2017-06-25","国","3","短","","12893","0","0","0"]])
 
@@ -164,7 +166,7 @@ class TestCsvFile(unittest.TestCase):
 
     # directory = ""
     def testCsvfl_dataFrameToCsv_7(self):
-        source  = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
+        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
                                     ["2017-06-25","国","2","M","","12893","0","0","12893"],
                                     ["2017-06-25","国","3","短","","12893","0","0","0"]])
 
@@ -173,13 +175,13 @@ class TestCsvFile(unittest.TestCase):
 
     # [directory]が[string]のデータ型以外の場合
     def testCsvfl_dataFrameToCsv_8(self):
-        source  = pandas.DataFrame([])
+        source = pandas.DataFrame([])
         result, msg, newName = csvfl_dataFrameToCsv ( source, 1, True, 123, csvOutput)
         self.assertEqual(( -1, "Error : An unexpected error occurred.", csvOutput), (result, msg, newName))
 
     # 指定されたdirectoryがない
     def testCsvfl_dataFrameToCsv_9(self):
-        source  = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
+        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
                                     ["2017-06-25","国","2","M","","12893","0","0","12893"],
                                     ["2017-06-25","国","3","短","","12893","0","0","0"]])
 
@@ -188,7 +190,7 @@ class TestCsvFile(unittest.TestCase):
 
     # [csvName]が[string]のデータ型以外の場合
     def testCsvfl_dataFrameToCsv_10(self):
-        source  = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
+        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
                                     ["2017-06-25","国","2","M","","12893","0","0","12893"],
                                     ["2017-06-25","国","3","短","","12893","0","0","0"]])
 
@@ -197,7 +199,7 @@ class TestCsvFile(unittest.TestCase):
 
     # ファイル名が不正。(¥　/　:　*　?　"　<　>　|が含まれる
     def testCsvfl_dataFrameToCsv_11(self):
-        source  = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
+        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
                                     ["2017-06-25","国","2","M","","12893","0","0","12893"],
                                     ["2017-06-25","国","3","短","","12893","0","0","0"]])
 
@@ -206,7 +208,7 @@ class TestCsvFile(unittest.TestCase):
 
     # csvName = ""
     def testCsvfl_dataFrameToCsv_12(self):
-        source  = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
+        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
                                     ["2017-06-25","国","2","M","","12893","0","0","12893"],
                                     ["2017-06-25","国","3","短","","12893","0","0","0"]])
 
@@ -216,7 +218,7 @@ class TestCsvFile(unittest.TestCase):
     # CSV ファイルが保存できない
     @unittest.skip("testCsvfl_dataFrameToCsv_13 skipping")
     def testCsvfl_dataFrameToCsv_13(self):
-        source  = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
+        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
                                     ["2017-06-25","国","2","M","","12893","0","0","12893"],
                                     ["2017-06-25","国","3","短","","12893","0","0","0"]])
 

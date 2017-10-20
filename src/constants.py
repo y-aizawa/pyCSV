@@ -3,7 +3,8 @@
 Modules constants.
 """
 CSV_SEP = ','
-CSV_ENCODING = 'S-JIS'
+#CSV_ENCODING = 'S-JIS'
+CSV_ENCODING = 'Shift_JISx0213'
 CSV_QUOTECHAR = '"'
 CSV_LINE_TERMINATOR = '\n'
 CSV_EXTENSION = '.csv'

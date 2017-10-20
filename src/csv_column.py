@@ -370,6 +370,7 @@ def csvcol_countEvery(source,keyColumnNumbers):
 
         keyUnique[:] = [x - 1 for x in keyUnique]
         newData = pandas.DataFrame(source.groupby(source.columns[keyUnique].tolist(), sort=False).size(), dtype=str).reset_index()
+        
         countRows = newData.shape[0] + 1
         countColumns = newData.shape[1]
         newData.rename(columns={0: HEADER_NAME_COUNT}, inplace=True)

@@ -40,16 +40,10 @@ class TestCsvFile(unittest.TestCase):
         self.assertEqual((1, "Complete.", 7693),(result, msg, len(rowNumbers)))
 
         result, msg, data_actual, countRows, countColumns = csvrow_sampling(source, 0.1)
-        #self.assertEqual((1, "Complete.", 6, 7),(result, msg, countRows, countColumns))        
+        self.assertEqual((1, "Complete.", math.ceil((124118-1) * 0.1) + 1, 7),(result, msg, countRows, countColumns))        
  
-        result, msg, newName = csvfl_dataFrameToCsv (data_actual, 1, True, dataDir, "csvrow_combined_test_1.csv")
-        #self.assertEqual((1, "Complete.",  "csvrow_combined_test_1.csv"), (result, msg, newName))        
-
-
-        # not tested yet some functions
-        #result, msg, newName = csvfl_dataFrameToCsv (data_actual, 1, True, dataDir, "csvcol_combined_test_2.csv")
-        #self.assertEqual((1, "Complete.",  "csvcol_combined_test_2.csv"), (result, msg, newName))
-
+        result, msg, newName = csvfl_dataFrameToCsv (data_actual, 1, True, dataDir, "output_csvrow_combined_test_1.csv")
+        self.assertEqual((1, "Complete.",  "output_csvrow_combined_test_1.csv"), (result, msg, newName))        
     
     # sourceのformatが不正
     def testCsv_csvrow_deleteRow1(self):

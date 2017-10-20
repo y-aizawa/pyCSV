@@ -10,10 +10,11 @@ import csv_row
 import csv_file
 
 """
-機能   :  都道府県ごとにサンプリングをする
+機能   :  与えられたキーと同じカラム名の値の種類ごとにサンプリングをする
 引数   :
             DataFrame   :   DataFrame形式のデータ
             float       :   samplingの割合 (e.g.: 10%の場合-.1、1%の場合0.01)
+            string      :   キーとする文字列
 戻り値  :
             int         :   ステータス
             string      :   メッセージ
@@ -22,7 +23,7 @@ import csv_file
             int         :   csvファイルにしたときのデータの列数
 """
 
-def anony_reagionalSampling (source, samplingRatio):
+def anony_reagionalSampling (source, samplingRatio, samplingKey):
     result = const.RESULT_COMPLETE      # ステータス
     msg = const.MSG_COMPLETE            # メッセージ
     newData = pd.DataFrame()            # sampling後のDataFrame形式のデータ
@@ -47,7 +48,7 @@ def anony_reagionalSampling (source, samplingRatio):
             return
         
         # sourceに都道府県列が存在しない
-        if not '都道府県' in source.columns:
+        if not samplingKey in source.columns:
             result = const.RESULT_ERR
             msg = const.MSG_ERR_INVALID_FORMAT_SOURCE
             return
@@ -59,12 +60,12 @@ def anony_reagionalSampling (source, samplingRatio):
             return
 
         #データから都道府県コードを抽出
-        regionList = source["都道府県"].unique()
+        regionList = source[samplingKey].unique()
         
         #都道府県ごとのデータを抽出
         sourcesByRegion=[]
         for i in range(regionList.shape[0]):
-            data = source[source["都道府県"] == regionList[i]]
+            data = source[source[samplingKey] == regionList[i]]
             sourcesByRegion.append(data)
             
         #都道府県ごとにサンプリングする
@@ -98,5 +99,5 @@ if __name__ == '__main__':
     dataPath = r"test\data\sample_large_data.CSV"
     result, msg, source, countRows, countColumns = csv_file.csvfl_csvToDataFrame (dataPath, 1)
     
-    result, msg, newData, countRows, countColumns = anony_reagionalSampling(source, 0.01)
+    result, msg, newData, countRows, countColumns = anony_reagionalSampling(source, 0.01, "都道府県")
     print (newData)

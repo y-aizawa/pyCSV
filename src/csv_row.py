@@ -212,6 +212,92 @@ def csvrow_sampling(source, samplingRatio):
         return result, msg, newData, countRows, countColumns
 
 """
+機能   :  キー(sampringKey)と同じカラム名の値の種類ごとにサンプリングをする
+引数   :
+            DataFrame   :   DataFrame形式のデータ
+            string      :   キーとする文字列=カラム名
+            float       :   samplingの割合 (e.g.: 10%の場合-.1、1%の場合0.01)
+戻り値  :
+            int         :   ステータス
+            string      :   メッセージ
+            DataFrame   :   sampling後のDataFrame形式のデータ
+            int         :   header有で、csvファイルにしたときのデータの行数
+            int         :   csvファイルにしたときのデータの列数
+"""
+
+def csvrow_samplingByItemInColumn (source, columnName, samplingRatio):
+    result = const.RESULT_COMPLETE      # ステータス
+    msg = const.MSG_COMPLETE            # メッセージ
+    newData = pandas.DataFrame()        # sampling後のDataFrame形式のデータ
+    countRows = 0                       # header有で、csvファイルにしたときのデータの行数
+    countColumns = 0
+    
+    try:
+        # sourceのformatが不正
+        if type(source) is not pandas.core.frame.DataFrame: 
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_INVALID_FORMAT_SOURCE
+            return
+
+        # [samplingRatio]が[float]のデータ型以外の場合
+        if type(samplingRatio) is not float:
+            raise Exception
+
+        # sourceがNULL
+        if not source.shape[0]:
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_EMPTY_SOURCE
+            return
+        
+        # sourceに都道府県列が存在しない
+        if not columnName in source.columns:
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_INVALID_FORMAT_SOURCE
+            return
+
+        # 指定されたsamplingRatioが0≦samplingRatio≦1の範囲外だった場合
+        if (samplingRatio <= 0 or samplingRatio >= 1):
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_OUT_OF_RANGE_SAMPLING.format(samplingRatio)
+            return
+
+        #データから都道府県コードを抽出
+        regionList = source[columnName].unique()
+        
+        #都道府県ごとのデータを抽出
+        sourcesByRegion=[]
+        for i in range(regionList.shape[0]):
+            data = source[source[columnName] == regionList[i]]
+            sourcesByRegion.append(data)
+            
+        #都道府県ごとにサンプリングする
+        sampledSources=[]
+        for i in range(regionList.shape[0]):
+            sampledSource = csvrow_sampling(sourcesByRegion[i], samplingRatio)
+            sampledSources.append(sampledSource[2])
+            
+        #都道府県ごとにサンプリングしたデータを結合
+        combinedSampledSource = sampledSources[0]
+        for i in range(1, regionList.shape[0]):
+            combinedSampledSource = pandas.concat([combinedSampledSource,sampledSources[i]])
+                
+        #結合したデータをシャッフルしてインデックスを振りなおす
+        combinedSampledSource = combinedSampledSource.reindex(np.random.permutation(combinedSampledSource.index)).reset_index(drop=True)
+        
+        newData = combinedSampledSource
+        
+        #行数はヘッダ付きでcsvに変換した際の行数とする為+1
+        countRows = newData.shape[0]+1
+        countColumns = newData.shape[1]
+        
+    except Exception:
+        result = const.RESULT_ERR_UNEXPECTED
+        msg = const.MSG_ERR_UNEXPECTED
+        
+    finally:
+        return result, msg, newData, countRows, countColumns
+
+"""
 機能   :  source(DataFrame)の中の、指定した列(targetColumnNumber)を検索し、keyと一致する行の番号を全てを取得する
 引数   :
             DataFrame   :   DataFrame形式のデータ
@@ -338,91 +424,6 @@ def csvrow_deleteRowsExcept(source, rowNumbers):
     finally:
         return result, msg, newData, countRows, countColumns
     
-"""
-機能   :  キー(sampringKey)と同じカラム名の値の種類ごとにサンプリングをする
-引数   :
-            DataFrame   :   DataFrame形式のデータ
-            float       :   samplingの割合 (e.g.: 10%の場合-.1、1%の場合0.01)
-            string      :   キーとする文字列
-戻り値  :
-            int         :   ステータス
-            string      :   メッセージ
-            DataFrame   :   sampling後のDataFrame形式のデータ
-            int         :   header有で、csvファイルにしたときのデータの行数
-            int         :   csvファイルにしたときのデータの列数
-"""
-
-def csvrow_reagionalSampling (source, samplingRatio, samplingKey):
-    result = const.RESULT_COMPLETE      # ステータス
-    msg = const.MSG_COMPLETE            # メッセージ
-    newData = pandas.DataFrame()            # sampling後のDataFrame形式のデータ
-    countRows = 0                       # header有で、csvファイルにしたときのデータの行数
-    countColumns = 0
-    
-    try:
-        # sourceのformatが不正
-        if type(source) is not pandas.core.frame.DataFrame: 
-            result = const.RESULT_ERR
-            msg = const.MSG_ERR_INVALID_FORMAT_SOURCE
-            return
-
-        # [samplingRatio]が[float]のデータ型以外の場合
-        if type(samplingRatio) is not float:
-            raise Exception
-
-        # sourceがNULL
-        if not source.shape[0]:
-            result = const.RESULT_ERR
-            msg = const.MSG_ERR_EMPTY_SOURCE
-            return
-        
-        # sourceに都道府県列が存在しない
-        if not samplingKey in source.columns:
-            result = const.RESULT_ERR
-            msg = const.MSG_ERR_INVALID_FORMAT_SOURCE
-            return
-
-        # 指定されたsamplingRatioが0≦samplingRatio≦1の範囲外だった場合
-        if (samplingRatio <= 0 or samplingRatio >= 1):
-            result = const.RESULT_ERR
-            msg = const.MSG_ERR_OUT_OF_RANGE_SAMPLING.format(samplingRatio)
-            return
-
-        #データから都道府県コードを抽出
-        regionList = source[samplingKey].unique()
-        
-        #都道府県ごとのデータを抽出
-        sourcesByRegion=[]
-        for i in range(regionList.shape[0]):
-            data = source[source[samplingKey] == regionList[i]]
-            sourcesByRegion.append(data)
-            
-        #都道府県ごとにサンプリングする
-        sampledSources=[]
-        for i in range(regionList.shape[0]):
-            sampledSource = csvrow_sampling(sourcesByRegion[i], samplingRatio)
-            sampledSources.append(sampledSource[2])
-            
-        #都道府県ごとにサンプリングしたデータを結合
-        combinedSampledSource = sampledSources[0]
-        for i in range(1, regionList.shape[0]):
-            combinedSampledSource = pandas.concat([combinedSampledSource,sampledSources[i]])
-                
-        #結合したデータをシャッフルしてインデックスを振りなおす
-        combinedSampledSource = combinedSampledSource.reindex(np.random.permutation(combinedSampledSource.index)).reset_index(drop=True)
-        
-        newData = combinedSampledSource
-        
-        #行数はヘッダ付きでcsvに変換した際の行数とする為+1
-        countRows = newData.shape[0]+1
-        countColumns = newData.shape[1]
-        
-    except Exception:
-        result = const.RESULT_ERR_UNEXPECTED
-        msg = const.MSG_ERR_UNEXPECTED
-        
-    finally:
-        return result, msg, newData, countRows, countColumns
 
 if __name__=='__main__':
     pass

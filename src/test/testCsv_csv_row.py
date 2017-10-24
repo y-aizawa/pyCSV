@@ -14,9 +14,9 @@ from pandas.util.testing import assert_frame_equal
 from csv_row import csvrow_deleteRow
 from csv_row import csvrow_deleteRows
 from csv_row import csvrow_sampling
+from csv_row import csvrow_samplingByItemInColumn
 from csv_row import csvrow_matchRowNumbers
 from csv_row import csvrow_deleteRowsExcept
-from csv_row import csvrow_reagionalSampling
 from csv_file import csvfl_csvToDataFrame
 from csv_file import csvfl_dataFrameToCsv
 
@@ -859,70 +859,70 @@ class TestCsvFile(unittest.TestCase):
 # PG_54
 
 # sourceのformatが不正
-    def testCsv_csvrow_reagionalSampling1(self):
+    def testCsv_csvrow_samplingByItemInColumn1(self):
         source = [["都道府県","集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
                   ["宮城県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"]]
         data_expected = pandas.DataFrame()
 
-        result, msg, data_actual, countRows, countColumns = csvrow_reagionalSampling(source, 0.1, "都道府県")
+        result, msg, data_actual, countRows, countColumns = csvrow_samplingByItemInColumn(source, "都道府県", 0.1)
         self.assertEqual((0, "Error : The source was invalid format.", 0, 0),(result, msg, countRows, countColumns))
         assert_frame_equal(data_expected, data_actual)
 
     # sourceがNULL
-    def testCsv_csvrow_reagionalSampling2(self):
+    def testCsv_csvrow_samplingByItemInColumn2(self):
         source = pandas.DataFrame()
         data_expected = pandas.DataFrame()
 
-        result, msg, data_actual, countRows, countColumns = csvrow_reagionalSampling(source, 0.1, "都道府県")
+        result, msg, data_actual, countRows, countColumns = csvrow_samplingByItemInColumn(source, "都道府県", 0.1)
         self.assertEqual((0, "Error : The source was empty.", 0, 0),(result, msg, countRows, countColumns))
         assert_frame_equal(data_expected, data_actual)
         
     # sourceがヘッダのみ
-    def testCsv_csvrow_reagionalSampling3(self):
+    def testCsv_csvrow_samplingByItemInColumn3(self):
         source = pandas.DataFrame([],columns=["都道府県","集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
         data_expected = pandas.DataFrame()
 
-        result, msg, data_actual, countRows, countColumns = csvrow_reagionalSampling(source, 0.1, "都道府県")
+        result, msg, data_actual, countRows, countColumns = csvrow_samplingByItemInColumn(source, "都道府県", 0.1)
         self.assertEqual((0, "Error : The source was empty.", 0, 0),(result, msg, countRows, countColumns))
         assert_frame_equal(data_expected, data_actual)
         
     # sourceに都道府県列が存在しない
-    def testCsv_csvrow_reagionalSampling4(self):
+    def testCsv_csvrow_samplingByItemInColumn4(self):
         source = pandas.DataFrame([["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
                                    ["2017-06-26","番","2","MMMMMM","","11111","20","20","10800"]],
                                    columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
         data_expected = pandas.DataFrame()
     
-        result, msg, data_actual, countRows, countColumns = csvrow_reagionalSampling(source, 0.1, "都道府県")
+        result, msg, data_actual, countRows, countColumns = csvrow_samplingByItemInColumn(source, "都道府県", 0.1)
         self.assertEqual((0, "Error : The source was invalid format.", 0, 0),(result, msg, countRows, countColumns))
         assert_frame_equal(data_expected, data_actual)
 
     # 予期しなかったError
     # [samplingRatio]が[float]のデータ型以外の場合
-    def testCsv_csvrow_reagionalSampling5(self):
+    def testCsv_csvrow_samplingByItemInColumn5(self):
         source = pandas.DataFrame([["鳥取県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
                                    ["東京都","2017-06-26","番","2","MMMMMM","","11111","20","20","10800"]],
                                    columns=["都道府県","集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
         data_expected = pandas.DataFrame()
 
-        result, msg, data_actual, countRows, countColumns = csvrow_reagionalSampling(source, 1, "都道府県")
+        result, msg, data_actual, countRows, countColumns = csvrow_samplingByItemInColumn(source, "都道府県", 1)
         self.assertEqual((-1, "Error : An unexpected error occurred.", 0, 0),(result, msg, countRows, countColumns))
         assert_frame_equal(data_expected, data_actual)
 
     # 指定されたsamplingRatioが0≦samplingRatio≦1の範囲外だった場合（samplingRatio　＜　0）
-    def testCsv_csvrow_reagionalSampling6(self):
+    def testCsv_csvrow_samplingByItemInColumn6(self):
         source = pandas.DataFrame([["宮崎県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
                                    ["島根県","2017-06-26","番","2","MMMMMM","","11111","20","20","10800"]],
                                    columns=["都道府県","集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
         data_expected = pandas.DataFrame()
 
-        result, msg, data_actual, countRows, countColumns = csvrow_reagionalSampling(source, -0.2, "都道府県")
+        result, msg, data_actual, countRows, countColumns = csvrow_samplingByItemInColumn(source, "都道府県", -0.2,)
         self.assertEqual((0, "Error : The samplingRatio must be more than 0 and less than 1. [-0.2]", 0, 0),(result, msg, countRows, countColumns))
         assert_frame_equal(data_expected, data_actual)
 
 
     # 指定されたsamplingRatioが0<samplingRatio<1の範囲外だった場合（samplingRatio = 0）
-    def testCsv_csvrow_reagionalSampling7(self):
+    def testCsv_csvrow_samplingByItemInColumn7(self):
         source = pandas.DataFrame([["和歌山県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
                                    ["北海道","2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
                                    ["愛媛県","2017-06-27","国","3","内の要素","","12893","90","50","10200"],
@@ -930,11 +930,11 @@ class TestCsvFile(unittest.TestCase):
                                    ["茨城県","2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]],
                                    columns=["都道府県","集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
         
-        result, msg, data_actual, countRows, countColumns = csvrow_reagionalSampling(source, 0.0, "都道府県")
+        result, msg, data_actual, countRows, countColumns = csvrow_samplingByItemInColumn(source, "都道府県", 0.0)
         self.assertEqual((0, 'Error : The samplingRatio must be more than 0 and less than 1. [0.0]', 0, 0),(result, msg, countRows, countColumns))
 
     # 指定されたsamplingRatioが0<samplingRatio<1の範囲外だった場合（samplingRatio = 1）
-    def testCsv_csvrow_reagionalSampling8(self):
+    def testCsv_csvrow_samplingByItemInColumn8(self):
         source = pandas.DataFrame([["沖縄県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
                                    ["京都府","2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
                                    ["佐賀県","2017-06-27","国","3","内の要素","","12893","90","50","10200"],
@@ -942,11 +942,11 @@ class TestCsvFile(unittest.TestCase):
                                    ["青森県","2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]],
                                    columns=["都道府県","集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
 
-        result, msg, data_actual, countRows, countColumns = csvrow_reagionalSampling(source, 1.0, "都道府県")
+        result, msg, data_actual, countRows, countColumns = csvrow_samplingByItemInColumn(source, "都道府県", 1.0)
         self.assertEqual((0, 'Error : The samplingRatio must be more than 0 and less than 1. [1.0]', 0, 0),(result, msg, countRows, countColumns))
 
     # 指定されたsamplingRatioが0<samplingRatio<1の範囲外だった場合（1≦samplingRatio）
-    def testCsv_csvrow_reagionalSampling9(self):
+    def testCsv_csvrow_samplingByItemInColumn9(self):
         source = pandas.DataFrame([["群馬県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
                                    ["兵庫県","2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
                                    ["大阪府","2017-06-27","国","3","内の要素","","12893","90","50","10200"],
@@ -955,12 +955,12 @@ class TestCsvFile(unittest.TestCase):
                                    columns=["都道府県","集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
         data_expected = pandas.DataFrame()
 
-        result, msg, data_actual, countRows, countColumns = csvrow_reagionalSampling(source, 1.1, "都道府県")
+        result, msg, data_actual, countRows, countColumns = csvrow_samplingByItemInColumn(source, "都道府県", 1.1)
         self.assertEqual((0, "Error : The samplingRatio must be more than 0 and less than 1. [1.1]", 0, 0),(result, msg, countRows, countColumns))
         assert_frame_equal(data_expected, data_actual)
 
     # Case: input correct values(0　＜　samplingRatio　＜　1)
-    def testCsv_csvrow_reagionalSampling10(self):
+    def testCsv_csvrow_samplingByItemInColumn10(self):
         source = pandas.DataFrame([["群馬県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
                                    ["群馬県","2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
                                    ["群馬県","2017-06-27","国","3","内の要素","","12893","90","50","10200"],
@@ -990,11 +990,11 @@ class TestCsvFile(unittest.TestCase):
                                    ["北海道","2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]],
                                    columns=["都道府県","集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
 
-        result, msg, data_actual, countRows, countColumns = csvrow_reagionalSampling(source, 0.5, "都道府県")
+        result, msg, data_actual, countRows, countColumns = csvrow_samplingByItemInColumn(source, "都道府県", 0.5)
         self.assertEqual((1, "Complete.", 16, 10),(result, msg, countRows, countColumns))
 
     # Case: input correct values(0　＜　samplingRatio　＜　1)
-    def testCsv_csvrow_reagionalSampling11(self):
+    def testCsv_csvrow_samplingByItemInColumn11(self):
         source = pandas.DataFrame([["群馬県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
                                    ["群馬県","2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
                                    ["群馬県","2017-06-27","国","3","内の要素","","12893","90","50","10200"],
@@ -1024,11 +1024,11 @@ class TestCsvFile(unittest.TestCase):
                                    ["北海道","2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]],
                                    columns=["都道府県","集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
 
-        result, msg, data_actual, countRows, countColumns = csvrow_reagionalSampling(source, 0.2, "都道府県")
+        result, msg, data_actual, countRows, countColumns = csvrow_samplingByItemInColumn(source, "都道府県", 0.2)
         self.assertEqual((1, "Complete.", 7, 10),(result, msg, countRows, countColumns))  
         
     # Case: input correct values(0　＜　samplingRatio　＜　1)
-    def testCsv_csvrow_reagionalSampling12(self):
+    def testCsv_csvrow_samplingByItemInColumn12(self):
         source = pandas.DataFrame([["群馬県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
                                    ["群馬県","2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
                                    ["群馬県","2017-06-27","国","3","内の要素","","12893","90","50","10200"],
@@ -1058,11 +1058,11 @@ class TestCsvFile(unittest.TestCase):
                                    ["北海道","2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]],
                                    columns=["都道府県","集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
 
-        result, msg, data_actual, countRows, countColumns = csvrow_reagionalSampling(source, 0.2, "都道府県")
+        result, msg, data_actual, countRows, countColumns = csvrow_samplingByItemInColumn(source, "都道府県", 0.2)
         self.assertEqual((1, "Complete.", 7, 10),(result, msg, countRows, countColumns))  
 
     # Case: input correct values(0　＜　samplingRatio　＜　1)
-    def testCsv_csvrow_reagionalSampling13(self):
+    def testCsv_csvrow_samplingByItemInColumn13(self):
         source = pandas.DataFrame([["群馬県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
                                    ["群馬県","2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
                                    ["群馬県","2017-06-27","国","3","内の要素","","12893","90","50","10200"],
@@ -1092,11 +1092,11 @@ class TestCsvFile(unittest.TestCase):
                                    ["北海道","2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"]],
                                    columns=["都道府県","集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
 
-        result, msg, data_actual, countRows, countColumns = csvrow_reagionalSampling(source, 0.99, "都道府県")
+        result, msg, data_actual, countRows, countColumns = csvrow_samplingByItemInColumn(source, "都道府県", 0.99)
         self.assertEqual((1, "Complete.", 22, 10),(result, msg, countRows, countColumns))  
 
     # Case: input correct values(0　＜　samplingRatio　＜　1)
-    def testCsv_csvrow_reagionalSampling14(self):
+    def testCsv_csvrow_samplingByItemInColumn14(self):
         source = pandas.DataFrame([["群馬県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
                                    ["和歌山県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
                                    ["沖縄県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
@@ -1105,7 +1105,7 @@ class TestCsvFile(unittest.TestCase):
                                    ["北海道","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"]],
                                    columns=["都道府県","集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
 
-        result, msg, data_actual, countRows, countColumns = csvrow_reagionalSampling(source, 0.99, "都道府県")
+        result, msg, data_actual, countRows, countColumns = csvrow_samplingByItemInColumn(source, "都道府県", 0.99)
         self.assertEqual((1, "Complete.", 1, 10),(result, msg, countRows, countColumns))  
 
 if __name__=='__main__':

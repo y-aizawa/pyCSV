@@ -33,7 +33,14 @@ csv_not_write = r"csv_not_write.csv"
 
 class TestCsvFile(unittest.TestCase):
     def setUp(self):
-        pass
+        self.source_empty = pandas.DataFrame()
+
+        self.source_invalid = [["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
+                               ["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"]]
+
+        self.source = pandas.DataFrame([["2017-06-25","国","2","M","","12893","0","0","12893"],
+                                   ["2017-06-25","国","3","短","","12893","0","0","0"]],
+                                   columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
 
     def tearDown(self):
         pass
@@ -116,149 +123,88 @@ class TestCsvFile(unittest.TestCase):
 # PG_12
     # sourceのformatが不正
     def testCsvfl_dataFrameToCsv_1(self):
-        source = [["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                  ["2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"]]
-
-        result, msg, newName = csvfl_dataFrameToCsv (source, 1, True, dataDir, csvOutput)
+        result, msg, newName = csvfl_dataFrameToCsv (self.source_invalid, 1, True, dataDir, csvOutput)
         self.assertEqual((0, "Error : The source was invalid format.", csvOutput), (result, msg, newName))
 
     # sourceがNULL
     def testCsvfl_dataFrameToCsv_2(self):
-        source = pandas.DataFrame()
-        result, msg, newName = csvfl_dataFrameToCsv (source, 1, True, dataDir, csvOutput)
+        result, msg, newName = csvfl_dataFrameToCsv (self.source_empty, 1, True, dataDir, csvOutput)
         self.assertEqual((0, "Error : The source was empty.", csvOutput), (result, msg, newName))
 
         # [existHeaderFlag]が[int]のデータ型以外の場合
     def testCsvfl_dataFrameToCsv_3(self):
-        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                    ["2017-06-25","国","2","M","","12893","0","0","12893"],
-                                    ["2017-06-25","国","3","短","","12893","0","0","0"]])
-
-        result, msg, newName = csvfl_dataFrameToCsv ( source,"1",True, dataDir, csvOutput)
+        result, msg, newName = csvfl_dataFrameToCsv (self.source, "1", True, dataDir, csvOutput)
         self.assertEqual((-1, "Error : An unexpected error occurred.",csvOutput), (result, msg, newName))
 
     # [existHeaderFlag]が[int]のデータ型であり、且つ０、１以外の場合
     def testCsvfl_dataFrameToCsv_4(self):
-        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                    ["2017-06-25","国","2","M","","12893","0","0","12893"],
-                                    ["2017-06-25","国","3","短","","12893","0","0","0"]])
-
-        result, msg, newName = csvfl_dataFrameToCsv ( source, 3,True, dataDir, csvOutput)
+        result, msg, newName = csvfl_dataFrameToCsv (self.source, 3, True, dataDir, csvOutput)
         self.assertEqual((-1, "Error : An unexpected error occurred.",csvOutput), (result, msg, newName))
 
     # [ovwFlag]が[bool]のデータ型以外の場合
     def testCsvfl_dataFrameToCsv_5(self):
-        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                    ["2017-06-25","国","2","M","","12893","0","0","12893"],
-                                    ["2017-06-25","国","3","短","","12893","0","0","0"]])
-
-        result, msg, newName = csvfl_dataFrameToCsv ( source, 1, "true", dataDir, csvOutput)
+        result, msg, newName = csvfl_dataFrameToCsv (self.source, 1, "true", dataDir, csvOutput)
         self.assertEqual((-1, "Error : An unexpected error occurred.",csvOutput), (result, msg, newName))
 
     # [ovwFlag]が[int]のデータ型であり、且つ０、１以外の場合
     def testCsvfl_dataFrameToCsv_6(self):
-        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                    ["2017-06-25","国","2","M","","12893","0","0","12893"],
-                                    ["2017-06-25","国","3","短","","12893","0","0","0"]])
-
-        result, msg, newName = csvfl_dataFrameToCsv ( source, 1, 3, dataDir, csvOutput)
+        result, msg, newName = csvfl_dataFrameToCsv (self.source, 1, 3, dataDir, csvOutput)
         self.assertEqual((-1, "Error : An unexpected error occurred.",csvOutput), (result, msg, newName))
 
     # directory = ""
     def testCsvfl_dataFrameToCsv_7(self):
-        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                    ["2017-06-25","国","2","M","","12893","0","0","12893"],
-                                    ["2017-06-25","国","3","短","","12893","0","0","0"]])
-
-        result, msg, newName = csvfl_dataFrameToCsv ( source, 1, True, "", csvOutput)
+        result, msg, newName = csvfl_dataFrameToCsv (self.source, 1, True, "", csvOutput)
         self.assertEqual((0, "Error : Cannot find the directory specified. []", csvOutput), (result, msg, newName))
 
     # [directory]が[string]のデータ型以外の場合
     def testCsvfl_dataFrameToCsv_8(self):
-        source = pandas.DataFrame([])
-        result, msg, newName = csvfl_dataFrameToCsv ( source, 1, True, 123, csvOutput)
+        result, msg, newName = csvfl_dataFrameToCsv (self.source, 1, True, 123, csvOutput)
         self.assertEqual(( -1, "Error : An unexpected error occurred.", csvOutput), (result, msg, newName))
 
     # 指定されたdirectoryがない
     def testCsvfl_dataFrameToCsv_9(self):
-        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                    ["2017-06-25","国","2","M","","12893","0","0","12893"],
-                                    ["2017-06-25","国","3","短","","12893","0","0","0"]])
-
-        result, msg, newName = csvfl_dataFrameToCsv (source,1,True,dataDirErr,csvOutput)
+        result, msg, newName = csvfl_dataFrameToCsv (self.source, 1, True, dataDirErr, csvOutput)
         self.assertEqual((0,r"Error : Cannot find the directory specified. [" + dataDirErr + "]", csvOutput), (result, msg, newName))
 
     # [csvName]が[string]のデータ型以外の場合
     def testCsvfl_dataFrameToCsv_10(self):
-        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                    ["2017-06-25","国","2","M","","12893","0","0","12893"],
-                                    ["2017-06-25","国","3","短","","12893","0","0","0"]])
-
-        result, msg, newName = csvfl_dataFrameToCsv (source,1,True,dataDir,123)
+        result, msg, newName = csvfl_dataFrameToCsv (self.source, 1, True, dataDir, 123)
         self.assertEqual((-1, "Error : An unexpected error occurred.", 123), (result, msg, newName))
 
     # ファイル名が不正。(¥　/　:　*　?　"　<　>　|が含まれる
     def testCsvfl_dataFrameToCsv_11(self):
-        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                    ["2017-06-25","国","2","M","","12893","0","0","12893"],
-                                    ["2017-06-25","国","3","短","","12893","0","0","0"]])
-
-        result, msg, newName = csvfl_dataFrameToCsv (source,1,True,dataDir,csv_invalid)
+        result, msg, newName = csvfl_dataFrameToCsv (self.source,1,True,dataDir,csv_invalid)
         self.assertEqual((0, "Error : Invalid CSV file name. [" + csv_invalid +"]", csv_invalid), (result, msg, newName))
 
     # csvName = ""
     def testCsvfl_dataFrameToCsv_12(self):
-        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                    ["2017-06-25","国","2","M","","12893","0","0","12893"],
-                                    ["2017-06-25","国","3","短","","12893","0","0","0"]])
-
-        result, msg, newName = csvfl_dataFrameToCsv (source,1,True,dataDir,"")
+        result, msg, newName = csvfl_dataFrameToCsv (self.source, 1, True, dataDir, "")
         self.assertEqual((0, "Error : Invalid CSV file name. []", ""), (result, msg, newName))
 
     # CSV ファイルが保存できない
     @unittest.skip("testCsvfl_dataFrameToCsv_13 skipping")
     def testCsvfl_dataFrameToCsv_13(self):
-        source = pandas.DataFrame([["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
-                                    ["2017-06-25","国","2","M","","12893","0","0","12893"],
-                                    ["2017-06-25","国","3","短","","12893","0","0","0"]])
-
-        result, msg, newName = csvfl_dataFrameToCsv (source, 1, True, dataDir, csv_not_write)
+        result, msg, newName = csvfl_dataFrameToCsv (self.source, 1, True, dataDir, csv_not_write)
         self.assertEqual((0, r"Error : Cannot create or save this file. [" + os.path.join(dataDir, csv_not_write)+ "]", csv_not_write), (result, msg, newName))
 
     # 処理が問題なく完了した（existHeaderFlag　＝　１）
     def testCsvfl_dataFrameToCsv_14(self):
-        source = pandas.DataFrame([["2017-06-25","国","2","M","","12893","0","0","12893"],
-                                          ["2017-06-25","国","3","短","","12893","0","0","0"]],
-                                          columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])        
-        
-        result, msg, newName = csvfl_dataFrameToCsv (source, 1, True, dataDir, csvOutput_w_header)
+        result, msg, newName = csvfl_dataFrameToCsv (self.source, 1, True, dataDir, csvOutput_w_header)
         self.assertEqual((1, "Complete.", csvOutput_w_header), (result, msg, newName))
 
     # 処理が問題なく完了した（existHeaderFlag　＝　0）
     def testCsvfl_dataFrameToCsv_15(self):
-        source = pandas.DataFrame([["2017-06-25","国","2","M","","12893","0","0","12893"],
-                                          ["2017-06-25","国","3","短","","12893","0","0","0"]],
-                                          columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])   
-
-        result, msg, newName = csvfl_dataFrameToCsv (source, 0, True, dataDir, csvOutput_wo_header)
+        result, msg, newName = csvfl_dataFrameToCsv (self.source, 0, True, dataDir, csvOutput_wo_header)
         self.assertEqual((1, "Complete.", csvOutput_wo_header), (result, msg, newName))
 
     # 処理が問題なく完了した（ovwFlag　＝　True）
     def testCsvfl_dataFrameToCsv_16(self):
-        source = pandas.DataFrame([["2017-06-25","国","2","M","","12893","0","0","12893"],
-                                          ["2017-06-25","国","3","短","","12893","0","0","0"]],
-                                          columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])   
-
-        result, msg, newName = csvfl_dataFrameToCsv (source, 1, True, dataDir, csvOutput)
+        result, msg, newName = csvfl_dataFrameToCsv (self.source, 1, True, dataDir, csvOutput)
         self.assertEqual((1, "Complete.", csvOutput), (result, msg, newName))
 
     # 処理が問題なく完了した（ovwFlag　＝　False）
     def testCsvfl_dataFrameToCsv_17(self):
-        source = pandas.DataFrame([["2017-06-25","国","2","M","","12893","0","0","12893"],
-                                          ["2017-06-25","国","3","短","","12893","0","0","0"]],
-                                          columns=["集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])   
-
-        result, msg, newName = csvfl_dataFrameToCsv (source, 1, False, dataDir, csvOutput)
+        result, msg, newName = csvfl_dataFrameToCsv (self.source, 1, False, dataDir, csvOutput)
         self.assertEqual((1, "Complete.", "output(1).csv"), (result, msg, newName))
         if os.path.isfile(os.path.join(dataDir, 'output(1).csv')):
             os.unlink(os.path.join(dataDir, 'output(1).csv'))

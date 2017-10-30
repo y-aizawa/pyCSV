@@ -212,7 +212,7 @@ def csvrow_sampling(source, samplingRatio):
         return result, msg, newData, countRows, countColumns
 
 """
-機能   :  キー(sampringKey)と同じカラム名の値の種類ごとにサンプリングをする
+機能   :  キー（columnName）の種類ごとにサンプリングをする
 引数   :
             DataFrame   :   DataFrame形式のデータ
             string      :   キーとする文字列=カラム名
@@ -249,7 +249,7 @@ def csvrow_samplingByItemInColumn (source, columnName, samplingRatio):
             msg = const.MSG_ERR_EMPTY_SOURCE
             return
         
-        # sourceに都道府県列が存在しない
+        # sourceに指定されたcolumnNameが存在しない
         if not columnName in source.columns:
             result = const.RESULT_ERR
             msg = const.MSG_ERR_INVALID_FORMAT_SOURCE
@@ -261,24 +261,24 @@ def csvrow_samplingByItemInColumn (source, columnName, samplingRatio):
             msg = const.MSG_ERR_OUT_OF_RANGE_SAMPLING.format(samplingRatio)
             return
 
-        #データから都道府県コードを抽出
-        regionList = source[columnName].unique()
+        #データからcolumnNameを重複除外して取得
+        uniqueColumnNameList = source[columnName].unique()
         
-        #都道府県ごとのデータを抽出
-        sourcesByRegion=[]
-        for i in range(regionList.shape[0]):
-            data = source[source[columnName] == regionList[i]]
-            sourcesByRegion.append(data)
+        #columnNameごとのデータを抽出
+        sourcesByColumnName=[]
+        for i in range(uniqueColumnNameList.shape[0]):
+            data = source[source[columnName] == uniqueColumnNameList[i]]
+            sourcesByColumnName.append(data)
             
-        #都道府県ごとにサンプリングする
+        #columnNameごとにサンプリングする
         sampledSources=[]
-        for i in range(regionList.shape[0]):
-            sampledSource = csvrow_sampling(sourcesByRegion[i], samplingRatio)
+        for i in range(uniqueColumnNameList.shape[0]):
+            sampledSource = csvrow_sampling(sourcesByColumnName[i], samplingRatio)
             sampledSources.append(sampledSource[2])
             
-        #都道府県ごとにサンプリングしたデータを結合
+        #サンプリングしたデータを結合
         combinedSampledSource = sampledSources[0]
-        for i in range(1, regionList.shape[0]):
+        for i in range(1, uniqueColumnNameList.shape[0]):
             combinedSampledSource = pandas.concat([combinedSampledSource,sampledSources[i]])
                 
         #結合したデータをシャッフルしてインデックスを振りなおす

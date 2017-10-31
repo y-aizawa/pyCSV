@@ -423,7 +423,89 @@ def csvrow_deleteRowsExcept(source, rowNumbers):
 
     finally:
         return result, msg, newData, countRows, countColumns
-    
+
+"""
+機能   :  DataFrameの指定した列が、指定したkeyと等しいレコードを検索
+          keyと一致したレコードの指定した列の値を、指定したvalueで置き換える
+引数   :
+            DataFrame   :   DataFrame形式のデータ
+            int        :   検索する対象の列番号
+            string      :   検索する値
+            list
+            string
+戻り値  :
+            int         :   ステータス
+            string      :   メッセージ
+            DataFrame   :   setValueのDataFrame形式のデータ
+"""
+def csvrow_setValueInRowsSearchedByKey(source, columnNumber, key, targetColumns, value):
+    result = const.RESULT_COMPLETE      # ステータス
+    msg = const.MSG_COMPLETE            # メッセージ
+    newData = pandas.DataFrame()        # setValueのDataFrame形式のデータ
+
+    try:
+        # sourceのformatが不正
+        if type(source) is not pandas.core.frame.DataFrame:
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_INVALID_FORMAT_SOURCE
+            return
+
+        # sourceがNULL
+        if not source.shape[0] and not source.shape[1]:
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_EMPTY_SOURCE
+            return
+
+        # [columnNumber]が[int]のデータ型以外の場合
+        if type(columnNumber) is not int:
+           raise Exception
+
+        # columnNumberがsourceの範囲を超えていた
+        if (columnNumber > source.shape[1] or columnNumber < 1):
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_OUT_OF_RANGE.format(const.NAME_COLUMN_NUMBER, columnNumber)
+            return
+
+        # [key]が[string]のデータ型以外の場合
+        # [value]が[string]のデータ型以外の場合
+        if type(key) is not str  or type(value) is not str:
+            raise Exception
+        key = key.strip()
+
+        # [targetColumns]が[list]のデータ型以外の場合
+        # targetColumnsがNULL
+        if (type(targetColumns) is not list) or (not len(targetColumns)):
+            raise Exception
+
+        targetColumnsUnique = np.unique(targetColumns).tolist()
+        # [targetColumnsUnique] 内の要素が[int]のデータ型以外の場合
+        if not all(type(item) is int for item in targetColumnsUnique):
+            raise Exception
+
+        # 指定されたtargetColumnsUniqueの範囲を超えていた
+        if(max(targetColumnsUnique) > (source.shape[1]) or min(targetColumnsUnique) < 1):
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_OUT_OF_RANGE_LIST.format(const.NAME_TARGET_COLUMN, const.NAME_TARGET_COLUMNS, targetColumnsUnique)
+            return
+
+        recordSearch = source[source.iloc[:, columnNumber - 1] == key].index
+        # keyと一致する列が一つもなかった
+        if (len(recordSearch) == 0):
+            result = const.RESULT_ERR
+            msg = const.MSG_ERR_KEY_NOT_FOUND.format(key, columnNumber)
+        else:
+            # 処理が問題なく完了した
+            targetColumnsUnique = list(np.asarray(targetColumnsUnique) - 1)
+            source.iloc[recordSearch, targetColumnsUnique] = value
+            newData = source
+
+    # 予期しなかったError
+    except Exception:
+        result = const.RESULT_ERR_UNEXPECTED
+        msg = const.MSG_ERR_UNEXPECTED
+
+    finally:
+        return result, msg, newData
 
 if __name__=='__main__':
     pass

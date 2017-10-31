@@ -24,6 +24,8 @@ NAME_ROW_NUMBER = 'rowNumber'
 NAME_ROW_NUMBERS = 'rowNumbers'
 NAME_TARGET_COLUMN_NUMBER = 'targetColumnNumber'
 NAME_KEY_COLUMN_NUMBERS = 'keyColumnNumbers'
+NAME_TARGET_COLUMN = 'targetColumn'
+NAME_TARGET_COLUMNS = 'targetColumns'
 
 MSG_COMPLETE = 'Complete.'
 MSG_ERR_NOT_EXIST_FILE = 'Error : Cannot find the CSV file specified. [{}]'

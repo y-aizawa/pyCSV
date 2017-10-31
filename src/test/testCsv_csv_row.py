@@ -17,6 +17,7 @@ from csv_row import csvrow_sampling
 from csv_row import csvrow_samplingByItemInColumn
 from csv_row import csvrow_matchRowNumbers
 from csv_row import csvrow_deleteRowsExcept
+from csv_row import csvrow_setValueInRowsSearchedByKey
 from csv_file import csvfl_csvToDataFrame
 from csv_file import csvfl_dataFrameToCsv
 
@@ -731,6 +732,295 @@ class TestCsvFile(unittest.TestCase):
 
         result, msg, data_actual, countRows, countColumns = csvrow_samplingByItemInColumn(source, "都道府県", 0.99)
         self.assertEqual((1, "Complete.", 1, 10),(result, msg, countRows, countColumns))  
+
+# PG_55
+    # sourceのformatが不正
+    def testCsv_csvrow_setValueInRowsSearchedByKey1(self):
+        targetColumns = [8, 10]
+        data_expected = pandas.DataFrame()
+
+        result, msg, data_actual = csvrow_setValueInRowsSearchedByKey(self.source_invalid, 1, "和歌山県", targetColumns, "NNN")
+        self.assertEqual((0),(result))
+        assert_frame_equal(data_expected, data_actual)
+
+    # sourceがNULL
+    def testCsv_csvrow_setValueInRowsSearchedByKey2(self):
+        targetColumns = [8, 10]
+        data_expected = pandas.DataFrame()
+
+        result, msg, data_actual = csvrow_setValueInRowsSearchedByKey(self.source_empty, 1, "和歌山県", targetColumns, "NNN")
+        self.assertEqual((0, "Error : The source was empty."),(result, msg))
+        assert_frame_equal(data_expected, data_actual)
+
+    # [columnNumber]が[int]のデータ型以外の場合
+    def testCsv_csvrow_setValueInRowsSearchedByKey3(self):
+        targetColumns = [8, 10]
+        data_expected = pandas.DataFrame()
+
+        result, msg, data_actual = csvrow_setValueInRowsSearchedByKey(self.source, "1", "和歌山県", targetColumns, "NNN")
+        self.assertEqual((-1, "Error : An unexpected error occurred."),(result, msg))
+        assert_frame_equal(data_expected, data_actual)
+
+    # columnNumberがsourceの範囲を超えていた
+    def testCsv_csvrow_setValueInRowsSearchedByKey4(self):
+        targetColumns = [8, 10]
+        data_expected = pandas.DataFrame()
+
+        result, msg, data_actual = csvrow_setValueInRowsSearchedByKey(self.source, 0, "和歌山県", targetColumns, "NNN")
+        self.assertEqual((0, "Error : The specified columnNumber was out of range. [0]"),(result, msg))
+        assert_frame_equal(data_expected, data_actual)
+
+    # columnNumberがsourceの範囲を超えていた
+    def testCsv_csvrow_setValueInRowsSearchedByKey5(self):
+        targetColumns = [8, 10]
+        data_expected = pandas.DataFrame()
+
+        result, msg, data_actual = csvrow_setValueInRowsSearchedByKey(self.source, 11, "和歌山県", targetColumns, "NNN")
+        self.assertEqual((0, "Error : The specified columnNumber was out of range. [11]"),(result, msg))
+        assert_frame_equal(data_expected, data_actual)
+
+    # [key]が[string]のデータ型以外の場合
+    def testCsv_csvrow_setValueInRowsSearchedByKey6(self):
+        targetColumns = [8, 10]
+        data_expected = pandas.DataFrame()
+
+        result, msg, data_actual = csvrow_setValueInRowsSearchedByKey(self.source, 1, 2, targetColumns, "NNN")
+        self.assertEqual((-1, "Error : An unexpected error occurred."),(result, msg))
+        assert_frame_equal(data_expected, data_actual)
+
+    # keyと一致する列が一つもなかった(Error key 1 byte, value soure 2 byte)
+    def testCsv_csvrow_setValueInRowsSearchedByKey7(self):
+        targetColumns = [8, 10]
+        data_expected = pandas.DataFrame()
+
+        result, msg, data_actual = csvrow_setValueInRowsSearchedByKey(self.source, 5, "ﾃｽﾄ", targetColumns, "NNN")
+        self.assertEqual((0, "Error : The specified key was not found in the column. [key = ﾃｽﾄ, targetColumnNumber = 5]"),(result, msg))
+        assert_frame_equal(data_expected, data_actual)
+
+    # keyと一致する列が一つもなかった(Error key 2 byte, value soure 1 byte)
+    def testCsv_csvrow_setValueInRowsSearchedByKey8(self):
+        targetColumns = [8, 10]
+        data_expected = pandas.DataFrame()
+
+        result, msg, data_actual = csvrow_setValueInRowsSearchedByKey(self.source, 5, "ヤマグチケン", targetColumns, "NNN")
+        self.assertEqual((0, "Error : The specified key was not found in the column. [key = ヤマグチケン, targetColumnNumber = 5]"),(result, msg))
+        assert_frame_equal(data_expected, data_actual)
+
+    # keyと一致する列が一つもなかった(upper and lower values)
+    def testCsv_csvrow_setValueInRowsSearchedByKey9(self):
+        targetColumns = [8, 10]
+        data_expected = pandas.DataFrame()
+
+        result, msg, data_actual = csvrow_setValueInRowsSearchedByKey(self.source, 5, "mmmmmm", targetColumns, "NNN")
+        self.assertEqual((0, "Error : The specified key was not found in the column. [key = mmmmmm, targetColumnNumber = 5]"),(result, msg))
+        assert_frame_equal(data_expected, data_actual)
+
+    # columnNumbersがNULL
+    def testCsv_csvrow_setValueInRowsSearchedByKey10(self):
+        targetColumns = []
+        data_expected = pandas.DataFrame()
+
+        result, msg, data_actual = csvrow_setValueInRowsSearchedByKey(self.source, 1, "和歌山県", targetColumns, "NNN")
+        self.assertEqual((-1, "Error : An unexpected error occurred."),(result, msg))
+        assert_frame_equal(data_expected, data_actual)
+
+    # [columnNumbers] 内の要素が[int]のデータ型以外の場合
+    def testCsv_csvrow_setValueInRowsSearchedByKey11(self):
+        targetColumns = [8, "10"]
+        data_expected = pandas.DataFrame()
+
+        result, msg, data_actual = csvrow_setValueInRowsSearchedByKey(self.source, 1, "和歌山県", targetColumns, "NNN")
+        self.assertEqual((-1, "Error : An unexpected error occurred."),(result, msg))
+        assert_frame_equal(data_expected, data_actual)
+
+    # columnNumberがsourceの範囲を超えていた
+    def testCsv_csvrow_setValueInRowsSearchedByKey12(self):
+        targetColumns = [0, 10]
+        data_expected = pandas.DataFrame()
+
+        result, msg, data_actual = csvrow_setValueInRowsSearchedByKey(self.source, 1, "和歌山県", targetColumns, "NNN")
+        self.assertEqual((0, "Error : The specified targetColumn in the targetColumns was out of range. [[0, 10]]"),(result, msg))
+        assert_frame_equal(data_expected, data_actual)
+
+    # columnNumberがsourceの範囲を超えていた
+    def testCsv_csvrow_setValueInRowsSearchedByKey13(self):
+        targetColumns = [8, 11]
+        data_expected = pandas.DataFrame()
+
+        result, msg, data_actual = csvrow_setValueInRowsSearchedByKey(self.source, 1, "和歌山県", targetColumns, "NNN")
+        self.assertEqual((0, "Error : The specified targetColumn in the targetColumns was out of range. [[8, 11]]"),(result, msg))
+        assert_frame_equal(data_expected, data_actual)
+
+    # [value]が[string]のデータ型以外の場合
+    def testCsv_csvrow_setValueInRowsSearchedByKey14(self):
+        targetColumns = [8, 10]
+        data_expected = pandas.DataFrame()
+
+        result, msg, data_actual = csvrow_setValueInRowsSearchedByKey(self.source, 1, "和歌山県", targetColumns, 1)
+        self.assertEqual((-1, "Error : An unexpected error occurred."),(result, msg))
+        assert_frame_equal(data_expected, data_actual)
+
+    # 処理が問題なく完了した(1 column)
+    def testCsv_csvrow_setValueInRowsSearchedByKey15(self):
+        targetColumns = [10]
+        data_expected = pandas.DataFrame([["群馬県","2017-06-25","問","3","テスト","","111","30","10","記述"],
+                                          ["群馬県","2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
+                                          ["群馬県","2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                          ["群馬県","2017-06-27","数","2","ﾔﾏｸﾞﾁｹﾝ","","11111","60","30","10400"],
+                                          ["群馬県","2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"],
+                                          ["和歌山県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","記述"],
+                                          ["和歌山県","2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
+                                          ["和歌山県","2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                          ["和歌山県","2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"],
+                                          ["秋田県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","記述"],
+                                          ["秋田県","2017-06-26","番","2","MMMMMM","","11111","20","20","10800"]],
+                                          columns=["都道府県","集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
+
+        result, msg, data_actual = csvrow_setValueInRowsSearchedByKey(self.source, 3, "問", targetColumns, "記述")
+        self.assertEqual((1, "Complete."),(result, msg))
+        assert_frame_equal(data_expected, data_actual)
+
+    # 処理が問題なく完了した(duplicate column)
+    def testCsv_csvrow_setValueInRowsSearchedByKey16(self):
+        targetColumns = [8, 8, 8, 8, 8, 8, 8]
+        data_expected = pandas.DataFrame([["群馬県","2017-06-25","問","3","テスト","","111","30","10","12100"],
+                                          ["群馬県","2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
+                                          ["群馬県","2017-06-27","国","3","内の要素","","12893","HHHH","50","10200"],
+                                          ["群馬県","2017-06-27","数","2","ﾔﾏｸﾞﾁｹﾝ","","11111","HHHH","30","10400"],
+                                          ["群馬県","2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"],
+                                          ["和歌山県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+                                          ["和歌山県","2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
+                                          ["和歌山県","2017-06-27","国","3","内の要素","","12893","HHHH","50","10200"],
+                                          ["和歌山県","2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"],
+                                          ["秋田県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+                                          ["秋田県","2017-06-26","番","2","MMMMMM","","11111","20","20","10800"]],
+                                          columns=["都道府県","集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
+
+        result, msg, data_actual = csvrow_setValueInRowsSearchedByKey(self.source, 2, "2017-06-27", targetColumns, "HHHH")
+        self.assertEqual((1, "Complete."),(result, msg))
+        assert_frame_equal(data_expected, data_actual)
+
+    # 処理が問題なく完了した(many column)
+    def testCsv_csvrow_setValueInRowsSearchedByKey17(self):
+        targetColumns = [8, 10]
+        data_expected = pandas.DataFrame([["群馬県","2017-06-25","問","3","テスト","","111","30","10","12100"],
+                                          ["群馬県","2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
+                                          ["群馬県","2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                          ["群馬県","2017-06-27","数","2","ﾔﾏｸﾞﾁｹﾝ","","11111","60","30","10400"],
+                                          ["群馬県","2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"],
+                                          ["和歌山県","2017-06-25","問","3","親ディレクトリ","","23242","NNN","10","NNN"],
+                                          ["和歌山県","2017-06-26","番","2","MMMMMM","","11111","NNN","20","NNN"],
+                                          ["和歌山県","2017-06-27","国","3","内の要素","","12893","NNN","50","NNN"],
+                                          ["和歌山県","2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","NNN","30","NNN"],
+                                          ["秋田県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+                                          ["秋田県","2017-06-26","番","2","MMMMMM","","11111","20","20","10800"]],
+                                          columns=["都道府県","集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
+
+        result, msg, data_actual = csvrow_setValueInRowsSearchedByKey(self.source, 1, "和歌山県", targetColumns, "NNN")
+        self.assertEqual((1, "Complete."),(result, msg))
+        assert_frame_equal(data_expected, data_actual)
+
+    # 処理が問題なく完了した(many column)
+    def testCsv_csvrow_setValueInRowsSearchedByKey18(self):
+        targetColumns = [6, 10]
+        data_expected = pandas.DataFrame([["都道府県","集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
+                                          ["群馬県","2017-06-25","問","3","テスト","","111","30","10","12100"],
+                                          ["群馬県","2017-06-26","番","2","MMMMMM","520","11111","20","20","520"],
+                                          ["群馬県","2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                          ["群馬県","2017-06-27","数","2","ﾔﾏｸﾞﾁｹﾝ","","11111","60","30","10400"],
+                                          ["群馬県","2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"],
+                                          ["和歌山県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+                                          ["和歌山県","2017-06-26","番","2","MMMMMM","520","11111","20","20","520"],
+                                          ["和歌山県","2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                          ["和歌山県","2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"],
+                                          ["秋田県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+                                          ["秋田県","2017-06-26","番","2","MMMMMM","520","11111","20","20","520"]],
+                                          columns=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+
+        result, msg, data_actual = csvrow_setValueInRowsSearchedByKey(self.source_header_number, 8, "20", targetColumns, "520")
+        self.assertEqual((1, "Complete."),(result, msg))
+        assert_frame_equal(data_expected, data_actual)
+
+    # 処理が問題なく完了した(many duplicate column)
+    def testCsv_csvrow_setValueInRowsSearchedByKey19(self):
+        targetColumns = [2, 2, 2, 4, 4, 4, 4, 9, 9, 9, 9, 9]
+        data_expected = pandas.DataFrame([["群馬県","2017-06-25","問","3","テスト","","111","30","10","12100"],
+                                          ["群馬県","TEST","番","TEST","MMMMMM","","11111","20","TEST","10800"],
+                                          ["群馬県","2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                          ["群馬県","2017-06-27","数","2","ﾔﾏｸﾞﾁｹﾝ","","11111","60","30","10400"],
+                                          ["群馬県","2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"],
+                                          ["和歌山県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+                                          ["和歌山県","TEST","番","TEST","MMMMMM","","11111","20","TEST","10800"],
+                                          ["和歌山県","2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                          ["和歌山県","2017-06-28","番","4","ﾔﾏｸﾞﾁｹﾝ","","11111","50","30","23242"],
+                                          ["秋田県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+                                          ["秋田県","TEST","番","TEST","MMMMMM","","11111","20","TEST","10800"]],
+                                          columns=["都道府県","集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
+
+        result, msg, data_actual = csvrow_setValueInRowsSearchedByKey(self.source, 5, "MMMMMM", targetColumns, "TEST")
+        self.assertEqual((1, "Complete."),(result, msg))
+        assert_frame_equal(data_expected, data_actual)
+
+    # 処理が問題なく完了した（all column）
+    def testCsv_csvrow_setValueInRowsSearchedByKey20(self):
+        targetColumns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        data_expected = pandas.DataFrame([["群馬県","2017-06-25","問","3","テスト","","111","30","10","12100"],
+                                          ["","","","","","","","","",""],
+                                          ["群馬県","2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                          ["","","","","","","","","",""],
+                                          ["","","","","","","","","",""],
+                                          ["和歌山県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+                                          ["","","","","","","","","",""],
+                                          ["和歌山県","2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                          ["","","","","","","","","",""],
+                                          ["秋田県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+                                          ["","","","","","","","","",""]],
+                                          columns=["都道府県","集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
+
+        result, msg, data_actual = csvrow_setValueInRowsSearchedByKey(self.source, 7, "11111", targetColumns, "")
+        self.assertEqual((1, "Complete."),(result, msg))
+        assert_frame_equal(data_expected, data_actual)
+
+    # 処理が問題なく完了した（all column）
+    def testCsv_csvrow_setValueInRowsSearchedByKey21(self):
+        targetColumns = [1, 2, 2, 3, 3, 4, 5, 5, 6, 7, 8, 9, 9, 10]
+        data_expected = pandas.DataFrame([["群馬県","2017-06-25","問","3","テスト","","111","30","10","12100"],
+                                          ["群馬県","2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
+                                          ["群馬県","2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                          ["群馬県","2017-06-27","数","2","ﾔﾏｸﾞﾁｹﾝ","","11111","60","30","10400"],
+                                          ["","","","","","","","","",""],
+                                          ["和歌山県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+                                          ["和歌山県","2017-06-26","番","2","MMMMMM","","11111","20","20","10800"],
+                                          ["和歌山県","2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                          ["","","","","","","","","",""],
+                                          ["秋田県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+                                          ["秋田県","2017-06-26","番","2","MMMMMM","","11111","20","20","10800"]],
+                                          columns=["都道府県","集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"])
+
+        result, msg, data_actual = csvrow_setValueInRowsSearchedByKey(self.source, 4, "   4   ", targetColumns, "")
+        self.assertEqual((1, "Complete."),(result, msg))
+        assert_frame_equal(data_expected, data_actual)
+
+    # 処理が問題なく完了した（all column）
+    def testCsv_csvrow_setValueInRowsSearchedByKey22(self):
+        targetColumns = [1, 2, 3, 3, 4, 5, 5, 6, 7, 8, 9, 9, 10]
+        data_expected = pandas.DataFrame([["都道府県","集計日","教科","設問番号","設問種別","マーク値","取込済解答数","当日取込全数","白紙検出数","採点完了件数"],
+                                          ["群馬県","2017-06-25","問","3","テスト","","111","30","10","12100"],
+                                          ["IIII","IIII","IIII","IIII","IIII","IIII","IIII","IIII","IIII","IIII"],
+                                          ["群馬県","2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                          ["群馬県","2017-06-27","数","2","ﾔﾏｸﾞﾁｹﾝ","","11111","60","30","10400"],
+                                          ["IIII","IIII","IIII","IIII","IIII","IIII","IIII","IIII","IIII","IIII"],
+                                          ["和歌山県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+                                          ["IIII","IIII","IIII","IIII","IIII","IIII","IIII","IIII","IIII","IIII"],
+                                          ["和歌山県","2017-06-27","国","3","内の要素","","12893","90","50","10200"],
+                                          ["IIII","IIII","IIII","IIII","IIII","IIII","IIII","IIII","IIII","IIII"],
+                                          ["秋田県","2017-06-25","問","3","親ディレクトリ","","23242","30","10","12100"],
+                                          ["IIII","IIII","IIII","IIII","IIII","IIII","IIII","IIII","IIII","IIII"]],
+                                          columns=[1,2,3,4,5,6,7,8,9,10])
+
+        result, msg, data_actual = csvrow_setValueInRowsSearchedByKey(self.source_header_number, 3, "番", targetColumns, "IIII")
+        self.assertEqual((1, "Complete."),(result, msg))
+        assert_frame_equal(data_expected, data_actual)
 
 if __name__=='__main__':
     unittest.main()
